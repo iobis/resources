@@ -1,0 +1,11 @@
+# Recent Posts Widget config
+[recent_posts]
+title = "Recent tutorials"            # default: "Recent Posts"
+length = 4                            # default: 5
+excludeTypes = ["page"]               # default: ["page"]
+
+# Taxonomy Cloud Widget config
+[taxonomy_cloud]
+title = ""                            # default: Plural Name for `taxonomyCloud.taxonomy`
+taxonomy = "tags"                     # default: "tags"
+shuffle = true                        # default: true
