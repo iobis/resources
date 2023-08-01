@@ -3,7 +3,7 @@
     {{ partial "list/date" . }}
     <div class='under-tag' style='color:#0076b1;font-family: IBM Plex Mono, monospace; font-size: small;'>
       {{ $tas := delimit .Params.tags "," }}
-      {{- partial "svg/icon" "tag" -}}{{ $tas | truncate 7 }}
+      {{ $tas | truncate 7 }}
     </div>
   </div>
   <header class='item-header'>
