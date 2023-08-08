@@ -5,6 +5,9 @@ authors: [silasprincipe]
 date: 2023-08-01
 categories: ["tutorial", "r", "data-manipulation"]
 tags: ["r", "parquet"]
+output: 
+  md_document:
+    preserve_yaml: true
 ---
 
 # What is Parquet?
@@ -21,10 +24,7 @@ Parquet files are several times lighter than csv files, improving
 storage and sharing of data. You can learn more about Parquet
 [here](https://parquet.apache.org/).
 
-<figure>
-<img src="image1.jpg" alt="image 1" />
-<figcaption aria-hidden="true">image 1</figcaption>
-</figure>
+![](image1.jpg)\
 
 The `Arrow` package enable to work with Parquet files (as well some
 other interesting formats) within R. You can read the full documentation
