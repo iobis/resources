@@ -12,7 +12,7 @@
       <pubDate>Tue, 01 Aug 2023 00:00:00 +0000</pubDate>
       
       <guid>http://www.example.com/tutorials/arrow-obis/</guid>
-      <description>Why use Parquet? This is&amp;hellip;</description>
+      <description>What is Parquet? Parquet is a lightweight format designed for columnar storage. Its main difference when compared to other formats like csv is that Parquet is column-oriented (while csv is row-oriented). This means that Parquet is much more efficient for data accessing.To illustrate, consider the scenario of extracting data from a specific column in a CSV file. This operation entails reading through all rows across all columns. In contrast, Parquet enables selective access solely to the required column, minimizing unnecessary data retrieval.</description>
     </item>
     
   </channel>

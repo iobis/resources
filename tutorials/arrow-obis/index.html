@@ -197,7 +197,7 @@
   <polyline points="12 6 12 12 15 15"/>
   
 </svg>
-One min read
+6 mins read
 </span>
 
 
@@ -211,8 +211,156 @@ One min read
   
 
   <div class='container entry-content'>
-  <h1 id="why-use-parquet">Why use Parquet?</h1>
-<p>This is&hellip;</p>
+  <h1 id="what-is-parquet">What is Parquet?</h1>
+<p>Parquet is a lightweight format designed for columnar storage. Its main
+difference when compared to other formats like <strong>csv</strong> is that Parquet
+is column-oriented (while csv is row-oriented). This means that Parquet
+is much more efficient for data accessing.To illustrate, consider the
+scenario of extracting data from a specific column in a CSV file. This
+operation entails reading through all rows across all columns. In
+contrast, Parquet enables selective access solely to the required
+column, minimizing unnecessary data retrieval. Also very important:
+Parquet files are several times lighter than csv files, improving
+storage and sharing of data. You can learn more about Parquet
+<a href="https://parquet.apache.org/">here</a>.</p>
+<!-- raw HTML omitted -->
+<p>The <code>Arrow</code> package enable to work with Parquet files (as well some
+other interesting formats) within R. You can read the full documentation
+of the package <a href="https://arrow.apache.org/docs/r/index.html">here</a>.</p>
+<p>We will now see how you can use Parquet in your data analysis workflow.
+Note that the real advantage of Parquet comes when working with large
+datasets, specially those that you can’t load into memory.</p>
+<h1 id="reading-and-writing-parquet-files">Reading and writing Parquet files</h1>
+<p>Opening a Parquet file is similar to opening a csv, and is done through
+the function <code>read_parquet</code>. We will start working with a small dataset
+containing records from <strong>OBIS</strong> for a fiddler crab species (<em>Leptuca
+thayeri</em>) which you can download
+<a href="https://raw.githubusercontent.com/iobis/resources/main/content/tutorials/arrow-obis/leptuca_thayeri.parquet">here</a>.</p>
+<pre><code>library(arrow) # To open the parquet files
+library(dplyr) # For data manipulation
+
+species &lt;- read_parquet(&quot;leptuca_thayeri.parquet&quot;)
+
+head(species)
+
+## # A tibble: 6 × 127
+##   basisOfRecord     class       continent country countryCode county datasetName
+##   &lt;chr&gt;             &lt;chr&gt;       &lt;chr&gt;     &lt;chr&gt;   &lt;chr&gt;       &lt;chr&gt;  &lt;chr&gt;      
+## 1 HumanObservation  Malacostra… América … Colomb… CO          San A… Epifauna m…
+## 2 HumanObservation  Malacostra… América … Colomb… CO          San A… Epifauna m…
+## 3 PreservedSpecimen Malacostra… &lt;NA&gt;      Brazil  &lt;NA&gt;        Paran… &lt;NA&gt;       
+## 4 HumanObservation  Malacostra… América … Colomb… CO          San A… Epifauna m…
+## 5 HumanObservation  Malacostra… América … Colomb… CO          San A… Epifauna m…
+## 6 HumanObservation  Malacostra… América … Colomb… CO          San A… Epifauna m…
+## # ℹ 120 more variables: dateIdentified &lt;chr&gt;, day &lt;chr&gt;, decimalLatitude &lt;dbl&gt;,
+## #   decimalLongitude &lt;dbl&gt;, establishmentMeans &lt;chr&gt;, eventDate &lt;chr&gt;,
+## #   eventID &lt;chr&gt;, family &lt;chr&gt;, genus &lt;chr&gt;, geodeticDatum &lt;chr&gt;,
+## #   georeferenceVerificationStatus &lt;chr&gt;, georeferencedBy &lt;chr&gt;,
+## #   georeferencedDate &lt;chr&gt;, habitat &lt;chr&gt;, higherClassification &lt;chr&gt;,
+## #   identifiedBy &lt;chr&gt;, identifiedByID &lt;chr&gt;, institutionCode &lt;chr&gt;,
+## #   institutionID &lt;chr&gt;, kingdom &lt;chr&gt;, language &lt;chr&gt;, locality &lt;chr&gt;, …
+</code></pre>
+<p>As you can see, the returned object is a <code>tibble</code> and you can work with
+it as any other regular data frame. So, for example, to get all records
+from Brazil, we can simply use this:</p>
+<pre><code>species_br &lt;- species %&gt;%
+  filter(country == &quot;Brazil&quot;)
+
+head(species_br, 2)
+
+## # A tibble: 2 × 127
+##   basisOfRecord     class       continent country countryCode county datasetName
+##   &lt;chr&gt;             &lt;chr&gt;       &lt;chr&gt;     &lt;chr&gt;   &lt;chr&gt;       &lt;chr&gt;  &lt;chr&gt;      
+## 1 PreservedSpecimen Malacostra… &lt;NA&gt;      Brazil  &lt;NA&gt;        Paran… &lt;NA&gt;       
+## 2 PreservedSpecimen Malacostra… &lt;NA&gt;      Brazil  &lt;NA&gt;        Mucuri &lt;NA&gt;       
+## # ℹ 120 more variables: dateIdentified &lt;chr&gt;, day &lt;chr&gt;, decimalLatitude &lt;dbl&gt;,
+## #   decimalLongitude &lt;dbl&gt;, establishmentMeans &lt;chr&gt;, eventDate &lt;chr&gt;,
+## #   eventID &lt;chr&gt;, family &lt;chr&gt;, genus &lt;chr&gt;, geodeticDatum &lt;chr&gt;,
+## #   georeferenceVerificationStatus &lt;chr&gt;, georeferencedBy &lt;chr&gt;,
+## #   georeferencedDate &lt;chr&gt;, habitat &lt;chr&gt;, higherClassification &lt;chr&gt;,
+## #   identifiedBy &lt;chr&gt;, identifiedByID &lt;chr&gt;, institutionCode &lt;chr&gt;,
+## #   institutionID &lt;chr&gt;, kingdom &lt;chr&gt;, language &lt;chr&gt;, locality &lt;chr&gt;, …
+</code></pre>
+<p>Saving a data frame to Parquet is also simple, and is done through the
+<code>write_parquet</code> function:</p>
+<pre><code>write_parquet(species_br, &quot;leptuca_thayeri_br.parquet&quot;)
+</code></pre>
+<h1 id="opening-larger-than-memory-files">Opening larger-than-memory files</h1>
+<p>While using Parquet files for smaller datasets is also relevant
+(remember: it’s several times lighter!), the real power of Parquet (and
+<code>Arrow</code>) is the ability to work with large datasets without the need to
+load all the data to memory. Suppose you want to get the number of
+records available on OBIS for each Teleostei species. This would involve
+loading all the OBIS database in the memory before filtering the data.
+If you ever tried that, it’s quite probable that your R crashed.
+However, with Arrow this is a straightforward task.</p>
+<p>For this part of the tutorial, we will work with the full export of the
+OBIS database which you can download here:
+<a href="https://obis.org/data/access/">https://obis.org/data/access/</a>. The file have ~15GB.</p>
+<pre><code>obis_file &lt;- &quot;obis_20230726.parquet&quot; # The path to the file
+</code></pre>
+<p>This time, instead of using <code>read_parquet</code> we will use the function
+<code>open_dataset</code>. The function will not read all the file into memory, but
+will instead read a “schema” showing how the file is organized.</p>
+<pre><code>obis &lt;- open_dataset(obis_file)
+</code></pre>
+<p>If you print the <code>obis</code> object you will see that it is not a data frame,
+but instead a <code>FileSytemDataset</code> object, showing the columns of the
+table with their respective data types. So how can we access the data?
+<code>Arrow</code> support <code>dplyr</code> verbs that enable us to work with the data
+without loading it. So in our case we can filter the data as usual:</p>
+<pre><code>teleostei &lt;- obis %&gt;%
+  filter(class == &quot;Teleostei&quot;) %&gt;%
+  filter(taxonRank == &quot;Species&quot;) %&gt;%
+  group_by(species) %&gt;%
+  summarise(records = n()) %&gt;%
+  collect()
+
+head(teleostei)
+
+## # A tibble: 6 × 2
+##   species                 records
+##   &lt;chr&gt;                     &lt;int&gt;
+## 1 Sebastes maliger          41380
+## 2 Pycnochromis acares        8724
+## 3 Gymnothorax fimbriatus      857
+## 4 Monotaxis grandoculis     10961
+## 5 Ctenochaetus flavicauda    1297
+## 6 Sargocentron tiere         3687
+</code></pre>
+<p>Depending on the filters it may take a few seconds before the data is
+returned. Note that after all the filters we added <code>collect()</code>, what
+indicates to <code>Arrow</code> that it should process our request. Several <code>dplyr</code>
+verbs are available to use with <code>Arrow</code>, a full list can be found
+<a href="https://arrow.apache.org/docs/dev/r/reference/acero.html">here</a>.</p>
+<p>When working with large datasets, it’s important that your filter
+produces an object of reasonable size (i.e., that after <code>collect()</code> can
+be loaded in memory).</p>
+<p>If you need to inspect the data before filtering, its possible to load
+only a slice of the data with <code>slice_head</code>:</p>
+<pre><code>obis %&gt;%
+  select(class, taxonRank, species) %&gt;% # Select just a few columns
+  slice_head(n = 5) %&gt;% # Select the first 5 lines
+  collect() # Process the request
+
+## # A tibble: 5 × 3
+##   class     taxonRank species               
+##   &lt;chr&gt;     &lt;chr&gt;     &lt;chr&gt;                 
+## 1 Teleostei Species   Sebastes maliger      
+## 2 Teleostei Species   Pycnochromis acares   
+## 3 Teleostei Species   Pycnochromis acares   
+## 4 Teleostei Species   Pycnochromis acares   
+## 5 Teleostei Species   Gymnothorax fimbriatus
+</code></pre>
+<h1 id="learning-more">Learning more</h1>
+<p>This tutorial barely scratches the surface of the full potential of
+working with Parquet. For example, it’s possible to save Parquet
+datasets in a way that only certain parts of the data need to be read,
+what can improve even more the computation. The better place to learn
+more about <code>Arrow</code> is the package website which contain several useful
+articles - <a href="https://arrow.apache.org/docs/dev/r/index.html">https://arrow.apache.org/docs/dev/r/index.html</a></p>
+<p>You can also see this tutorial on using Parquet with GBIF data:
+<a href="https://data-blog.gbif.org/post/apache-arrow-and-parquet/">https://data-blog.gbif.org/post/apache-arrow-and-parquet/</a></p>
 
 </div>
 
