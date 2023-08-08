@@ -24,7 +24,7 @@ Parquet files are several times lighter than csv files, improving
 storage and sharing of data. You can learn more about Parquet
 [here](https://parquet.apache.org/).
 
-![](image1.jpg)\
+![](image1.jpg)
 
 The `Arrow` package enable to work with Parquet files (as well some
 other interesting formats) within R. You can read the full documentation
