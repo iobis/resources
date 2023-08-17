@@ -13,101 +13,30 @@ You may also want to explore our extensive documentation on the [OBIS manual](ht
 #### Finding my schema
 
 {{< rawhtml >}}
-  <!-- This code is quite complicated, sorry. For understanding the steps, see the framework.png file in the source folder -->
+<!-- This code is quite complicated, sorry. For understanding the steps, see the framework.png file in the source folder. You have to edit the individual html files to alter the content -->
   
-  <style>
-    .form-para {
-      font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Open Sans,Helvetica Neue,sans-serif;
-      font-weight: 700;
-      line-height: 1.2;
-      color: #0076b1;
-    }
-    .form-prev {
-      font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Open Sans,Helvetica Neue,sans-serif;
-      font-size: 1em;
-      line-height: 1;
-      margin-top: 0px;
-      font-style: italic;
-      color: #D6D6D6;
-    }
-    .form-explanation {
-      font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Open Sans,Helvetica Neue,sans-serif;
-      font-size: 1em;
-      line-height: 1;
-      margin-top: 0px;
-      color: #D6D6D6;
-    }
-    .form-box-stitle {
-      font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Open Sans,Helvetica Neue,sans-serif;
-      font-weight: 700;
-      font-size: 1.5em;
-      line-height: 1.2;
-      color: #FFFFFF;
-    }
-    .form-box-title {
-      font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Open Sans,Helvetica Neue,sans-serif;
-      font-weight: 700;
-      line-height: 1;
-      color: #0076b1;
-    }
-    .form-box-other {
-      font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Open Sans,Helvetica Neue,sans-serif;
-      font-weight: 700;
-      line-height: 1;
-      margin-top: 18px;
-      font-size: 1.2em;
-      color: #949494;
-    }
-    .form-box-container {
-      display: flex;
-    }
-    .form-box-color {
-      border-radius: 5px;
-      background: linear-gradient(90deg, #0076B1 0%, #04A3F2 100%);
-      padding: 20px;
-      width: 250px;
-      height: auto;
-    }
-    .form-box-color-agg {
-      border-radius: 5px;
-      background: linear-gradient(90deg, #008E6E 0%, #4EC7AC 100%);
-      padding: 20px;
-      width: 250px;
-      height: auto;
-    }
-    .form-box-gray {
-      border-radius: 5px;
-      border: 1.5px solid #D6D6D6;
-      padding: 20px;
-      width: 100%;
-      height: auto;
-      margin-left: 10px;  /* Magic! */
-    }
-    .button,button,input[type=button],input[type=reset],input[type=submit] {
-      width: auto;
-      padding: .5em .75em;
-      border: 1px solid #bdbdbd;
-      border-radius: .2em;
-      background: #fff;
-      margin-top: 5px;
-      margin-bottom: 5px;
-      color: #37474f;
-      font-size: 1em;
-      font-weight: 700;
-      line-height: 1.15;
-      text-align: center;
-      letter-spacing: 1px;
-      white-space: nowrap;
-      text-transform: uppercase;
-      -webkit-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
-      user-select: none;
-      cursor: pointer;
-      transition: .1s ease-in-out
-    }
-  </style>
+  <!-- Load the scripts -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <link rel="stylesheet" href="dwc.css">
+  <script>
+  $(document).ready(function(){
+     
+     $('#occ-core1').load("occ_core.html");
+     $('#occ-core2').load("occ_core.html");
+     $('#occ-core3').load("occ_core.html");
+     $('#occ-core4').load("occ_core.html");
+     $('#event-core1').load("event_core.html");
+     $('#event-core2').load("event_core.html");
+     $('#emof-ext1').load("emof_ext.html");
+     $('#emof-ext2').load("emof_ext.html");
+     $('#dna-ext1').load("dna_ext.html");
+     $('#dna-ext2').load("dna_ext.html");
   
+  });
+  </script>
+  
+
+  <!-- Buttons for steps -->
   <form id="dynamic-form">
     <div class="step" id="step1">
       <p class="form-para">What kind of data do you have, or will collect?</p>
@@ -121,20 +50,83 @@ You may also want to explore our extensive documentation on the [OBIS manual](ht
     
     
     
-    
-    
     <!-- All other path -->
     <div class="step" id="step2" style="display: none;">
-      <!-- Content for Option 1 -->
-      <p>You chose Option 1. This is Step 2 for Option 1.</p>
+      <!-- Content -->
+      <p class="form-prev">You don't have genetic data &#8674;</p>
+      <p class="form-para">Will this be a recurring sampling event OR can you aggregate your data in a single event?</p>
+      <p class="form-explanation">A recurring sampling is any sampling that will occur in more than one time step. You can also have a single sampling, but have information that is relative to all your data (e.g. all collected on the same place). Note that many datasets can possibly be grouped in an event.</p>
+            <button class="option-button" type="button" data-step="step2_yes"><svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><style>svg{fill:#D6D6D6}</style><path d="M438.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 338.7 393.4 105.4c12.5-12.5 32.8-12.5 45.3 0z"/></svg> Yes</button>
+      <button class="option-button" type="button" data-step="step2_no"><svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 384 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><style>svg{fill:#d6d6d6}</style><path d="M376.6 84.5c11.3-13.6 9.5-33.8-4.1-45.1s-33.8-9.5-45.1 4.1L192 206 56.6 43.5C45.3 29.9 25.1 28.1 11.5 39.4S-3.9 70.9 7.4 84.5L150.3 256 7.4 427.5c-11.3 13.6-9.5 33.8 4.1 45.1s33.8 9.5 45.1-4.1L192 306 327.4 468.5c11.3 13.6 31.5 15.4 45.1 4.1s15.4-31.5 4.1-45.1L233.7 256 376.6 84.5z"/></svg> No</button>
     </div>
-    
-    
+
+    <!-- All other path + YES -->
+    <div class="step" id="step2_yes" style="display: none;">
+      <!-- Content -->
+      <p class="form-prev">You don't have genetic data &#8674;</p>
+      <p class="form-prev">This will be a recurring event or can be aggregated into an event &#8674;</p>
+      <p class="form-para">Have (or will) you collect any data associated with samples or sampling?</p>
+      <p class="form-explanation">Examples of associated data are temperature, length of specimen, etc.</p>
+            <button class="option-button" type="button" data-step="step4_yes"><svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><style>svg{fill:#D6D6D6}</style><path d="M438.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 338.7 393.4 105.4c12.5-12.5 32.8-12.5 45.3 0z"/></svg> Yes</button>
+      <button class="option-button" type="button" data-step="step4_no"><svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 384 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><style>svg{fill:#d6d6d6}</style><path d="M376.6 84.5c11.3-13.6 9.5-33.8-4.1-45.1s-33.8-9.5-45.1 4.1L192 206 56.6 43.5C45.3 29.9 25.1 28.1 11.5 39.4S-3.9 70.9 7.4 84.5L150.3 256 7.4 427.5c-11.3 13.6-9.5 33.8 4.1 45.1s33.8 9.5 45.1-4.1L192 306 327.4 468.5c11.3 13.6 31.5 15.4 45.1 4.1s15.4-31.5 4.1-45.1L233.7 256 376.6 84.5z"/></svg> No</button>
+    </div>
+
+    <!-- All other path + YES + YES (step4_yes) -->
+    <div class="step" id="step4_yes" style="display: none;">
+      <!-- Content -->
+      <p class="form-prev">You don't have genetic data &#8674;</p>
+      <p class="form-prev">This will be a recurring event or can be aggregated into an event &#8674;</p>
+      <p class="form-prev">You collected associated data &#8674;</p>
+      <div id="event-core1"></div>
+      <p class="form-box-other">+ You will also need:</p>
+      <div id="emof-ext1"></div>
+    </div>
+
+    <!-- All other path + YES + NO (step4_no) -->
+    <div class="step" id="step4_no" style="display: none;">
+      <!-- Content -->
+      <p class="form-prev">You don't have genetic data &#8674;</p>
+      <p class="form-prev">This will be a recurring event or can be aggregated into an event &#8674;</p>
+      <p class="form-prev">You have not collected associated data &#8674;</p>
+      <div id="event-core2"></div>
+    </div>
+
+    <!-- All other path + NO -->
+    <div class="step" id="step2_no" style="display: none;">
+      <!-- Content -->
+      <p class="form-prev">You don't have genetic data &#8674;</p>
+      <p class="form-prev">This will not be a recurring event or can't be aggregated into an event &#8674;</p>
+      <p class="form-para">Have (or will) you collect any data associated with samples or sampling?</p>
+      <p class="form-explanation">Examples of associated data are temperature, length of specimen, etc.</p>
+            <button class="option-button" type="button" data-step="step5_yes"><svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><style>svg{fill:#D6D6D6}</style><path d="M438.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 338.7 393.4 105.4c12.5-12.5 32.8-12.5 45.3 0z"/></svg> Yes</button>
+      <button class="option-button" type="button" data-step="step5_no"><svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 384 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><style>svg{fill:#d6d6d6}</style><path d="M376.6 84.5c11.3-13.6 9.5-33.8-4.1-45.1s-33.8-9.5-45.1 4.1L192 206 56.6 43.5C45.3 29.9 25.1 28.1 11.5 39.4S-3.9 70.9 7.4 84.5L150.3 256 7.4 427.5c-11.3 13.6-9.5 33.8 4.1 45.1s33.8 9.5 45.1-4.1L192 306 327.4 468.5c11.3 13.6 31.5 15.4 45.1 4.1s15.4-31.5 4.1-45.1L233.7 256 376.6 84.5z"/></svg> No</button>
+    </div>
+
+    <!-- All other path + NO + YES (step5_yes) -->
+    <div class="step" id="step5_yes" style="display: none;">
+      <!-- Content -->
+      <p class="form-prev">You don't have genetic data &#8674;</p>
+      <p class="form-prev">This will not be a recurring event or can't be aggregated into an event &#8674;</p>
+      <p class="form-prev">You collected associated data &#8674;</p>
+      <div id="occ-core1"></div>
+      <p class="form-box-other">+ You will also need:</p>
+      <div id="emof-ext2"></div>
+    </div>
+
+    <!-- All other path + NO + NO (step5_no) -->
+    <div class="step" id="step5_no" style="display: none;">
+      <!-- Content -->
+      <p class="form-prev">You don't have genetic data &#8674;</p>
+      <p class="form-prev">This will not be a recurring event or can't be aggregated into an event &#8674;</p>
+      <p class="form-prev">You have not collected associated data &#8674;</p>
+      <div id="occ-core2"></div>
+    </div>
+
     
     
     <!-- Genetic path -->
     <div class="step" id="step3" style="display: none;">
-      <!-- Content for Option 2 -->
+      <!-- Content -->
       <p class="form-prev">You have genetic data &#8674;</p>
       <p class="form-para">Have (or will) you collect any data associated with samples or sampling?</p>
       <p class="form-explanation">Examples of associated data are temperature, length of specimen, etc.</p>
@@ -144,49 +136,24 @@ You may also want to explore our extensive documentation on the [OBIS manual](ht
     
     <!-- Genetic path terminal YES-->
     <div class="step" id="step3_yes" style="display: none;">
-      <!-- Content for Option 2 -->
+      <!-- Content -->
       <p class="form-prev">You have genetic data &#8674;</p>
       <p class="form-prev">You collected associated data &#8674;</p>
-      <div class="form-box-container">
-        <div class="form-box-color">
-          <p class="form-box-stitle">Occurrence core</p>
-          <svg class="svg-b" xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 384 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><style>.svg-b{fill:#FFFFFF}</style><path d="M215.7 499.2C267 435 384 279.4 384 192C384 86 298 0 192 0S0 86 0 192c0 87.4 117 243 168.3 307.2c12.3 15.3 35.1 15.3 47.4 0zM192 128a64 64 0 1 1 0 128 64 64 0 1 1 0-128z"/></svg>
-        </div>
-        <div class="form-box-gray">
-          <p class="form-box-title">You have an occurrence core dataset</p>
-          <p>Occurrence Core datasets describe observations and specimen records and cover instances when:
-            <ul>
-              <li>No information on how the data was sampled or samples were processed is available</li>
-              <li>No abiotic measurements are taken or provided</li>
-              <li>You have eDNA and DNA-derived data</li>
-              <li>Biological measurements are made on individual specimens (each specimen is a single occurrence record)</li>
-            </ul>
-            You can learn more about that <a href="https://manual-dev.obis.org/formatting.html#when-to-use-occurrence-core">here</a>
-          </p>
-        </div>
-      </div>
+      <div id="occ-core3"></div>
       <p class="form-box-other">+ You will also need:</p>
-      <div class="form-box-container">
-        <div class="form-box-color-agg">
-          <p class="form-box-stitle">DNA derived data extensions</p>
-        </div>
-        <div class="form-box-gray">
-          <p class="form-box-title">You have DNA derived data</p>
-          <p>This genetic data may come from a sampling event, an individual organism, may be linked to physical material (or not), or may result from DNA detection methods e.g., metabarcoding or qPCR. Thus genetic data may reflect a single organism, or may include information from bulk samples with many individuals. Still, DNA-derived occurrence data of species should be documented as standardized and as reproducible as possible.</p>
-          <p>You can learn more about that <a href="https://manual-dev.obis.org/dna_data.html">here</a></p>
-        </div>
-      </div>
+      <div id="dna-ext1"></div>
       <br>
-      <div class="form-box-container">
-        <div class="form-box-color-agg">
-          <p class="form-box-stitle">eMoF extension</p>
-        </div>
-        <div class="form-box-gray">
-          <p class="form-box-title">You have measurement or facts</p>
-          <p>Any data related to abiotic or biotic measurements, including sampling information and protocols should be included in the eMoF table.</p>
-          <p>You can learn more about that <a href="https://manual-dev.obis.org/format_emof.html">here</a></p>
-        </div>
-      </div>
+      <div id="emof-ext3"></div>
+    </div>
+
+    <!-- Genetic path terminal NO-->
+    <div class="step" id="step3_no" style="display: none;">
+      <!-- Content -->
+      <p class="form-prev">You have genetic data &#8674;</p>
+      <p class="form-prev">You have not collected associated data &#8674;</p>
+      <div id="occ-core4"></div>
+      <p class="form-box-other">+ You will also need:</p>
+      <div id="dna-ext2"></div>
     </div>
     
     <!-- Restart Button -->

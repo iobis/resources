@@ -58,4 +58,5 @@ themes/minimo
 
 # Certain content files
 content/**/*.html
+!content/find-your-dwc/*
 
