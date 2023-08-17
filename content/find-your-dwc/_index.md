@@ -25,7 +25,7 @@ You may also want to explore our extensive documentation on the [OBIS manual](ht
     .form-prev {
       font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Open Sans,Helvetica Neue,sans-serif;
       font-size: 1em;
-      line-height: 0.1;
+      line-height: 1;
       margin-top: 0px;
       font-style: italic;
       color: #D6D6D6;
@@ -33,7 +33,7 @@ You may also want to explore our extensive documentation on the [OBIS manual](ht
     .form-explanation {
       font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Open Sans,Helvetica Neue,sans-serif;
       font-size: 1em;
-      line-height: 0.1;
+      line-height: 1;
       margin-top: 0px;
       color: #D6D6D6;
     }
