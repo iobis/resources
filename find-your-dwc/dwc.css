@@ -95,3 +95,6 @@
       cursor: pointer;
       transition: .1s ease-in-out
     }
+    svg {
+      pointer-events: none;
+    }
