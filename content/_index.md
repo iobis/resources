@@ -12,4 +12,4 @@ You can contribute with tutorials following the guidelines available [at our rep
 
 Don't know where to start? We suggest reading the [OBIS manual](https://manual.obis.org/) where you will find the most complete guide about how OBIS works and the different types of data available.
 
-Check also the available [packages and pipelines](https://resources.obis.org/packages/) for R and other languages.
+Check also the available [packages and pipelines](https://resources.obis.org/packages/) for R and other languages, and [our tool](https://resources.obis.org/find-your-dwc/) to find the right Darwin Core schema for your data.

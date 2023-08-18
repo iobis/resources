@@ -6,9 +6,9 @@ weight: 20
 
 Darwin Core (DwC) is a body of standards (i.e., identifiers, labels, definitions) that facilitate sharing biodiversity informatics. It provides stable terms and vocabularies related to biological objects/data and their collection.
 
-DwC is meant to be used from the beginning of your research and is an excellent way of organizing and standardizing your data. **All data submitted to OBIS must follow the Darwin Core guidelines**. Whether you are planning your project or preparing to submit your data to an OBIS node, a key question is on what type of strucuture your data fits and what DwC terms are relevant (and necessary). Considering that, we prepared this quick tool to explore the option most suited to your case.
+DwC is meant to be used from the beginning of your research and is an excellent way of organizing and standardizing your data. **All data submitted to OBIS must follow the Darwin Core guidelines**. Whether you are planning your project or preparing to submit your data to an OBIS node, a key question is on what type of structure your data fits and what DwC terms are relevant (and necessary). Considering that, we prepared this quick tool to explore the option most suited to your case.
 
-You may also want to explore our extensive documentation on the [OBIS manual](https://manual.obis.org), which provide more in-depth details, or this [quick decision tree](link_to_tree) created by Elizabeth Lawrence.
+You may also want to explore our extensive documentation in the [OBIS manual](https://manual.obis.org), which provide more in-depth details, or this [quick decision tree](decisiontree_dwc.pdf) created by Elizabeth Lawrence.
 
 #### Finding my schema
 
