@@ -29,6 +29,7 @@ You may also want to explore our extensive documentation in the [OBIS manual](ht
      $('#event-core2').load("event_core.html");
      $('#emof-ext1').load("emof_ext.html");
      $('#emof-ext2').load("emof_ext.html");
+     $('#emof-ext3').load("emof_ext.html");
      $('#dna-ext1').load("dna_ext.html");
      $('#dna-ext2').load("dna_ext.html");
   
