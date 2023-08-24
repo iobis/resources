@@ -13,6 +13,23 @@ a{
     color: #0076b1!important;
 }
 
+/* Flexboxs for package page */
+
+.package-box-container {
+  display: flex;
+}
+.package-box-image {
+  padding: 20px;
+  width: 250px;
+  height: auto;
+}
+.package-box {
+  padding: 20px;
+  width: 100%;
+  height: auto;
+  margin-left: 10px;
+}
+
 /* Add gray background to sidebar */
 .sidebar {
     background-color: #f5f5f5;
