@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Tutorials on resources</title>
-    <link>http://www.example.com/tutorials/</link>
-    <description>Recent content in Tutorials on resources</description>
+    <title>environmental-information on resources</title>
+    <link>http://www.example.com/categories/environmental-information/</link>
+    <description>Recent content in environmental-information on resources</description>
     <generator>Hugo -- gohugo.io</generator>
-    <lastBuildDate>Tue, 01 Aug 2023 00:00:00 +0000</lastBuildDate><atom:link href="http://www.example.com/tutorials/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Tue, 01 Aug 2023 00:00:00 +0000</lastBuildDate><atom:link href="http://www.example.com/categories/environmental-information/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Matching environmental information with OBIS occurrences</title>
       <link>http://www.example.com/tutorials/env-data/</link>
@@ -14,15 +14,6 @@
       <guid>http://www.example.com/tutorials/env-data/</guid>
       <description>Obtaining environmental information for species occurrences For many research questions, we are interested in the environmental conditions where a certain species, population, or community lives. OBIS already provides some environmental data along with the records. For example, if you download records for the species Actinia equina, you can obtain values for sea surface temperature (SST), salinity (SSS), and bathymetry:
 library(robis) occ &amp;lt;- occurrence(&amp;quot;Actinia equina&amp;quot;) ## Retrieved 5000 records of approximately 9583 (52%)Retrieved 9583 records of ## approximately 9583 (100%) head(occ[,c(&amp;quot;sst&amp;quot;, &amp;quot;sss&amp;quot;, &amp;quot;bathymetry&amp;quot;)], 4) ## # A tibble: 4 × 3 ## sst sss bathymetry ## &amp;lt;dbl&amp;gt; &amp;lt;dbl&amp;gt; &amp;lt;dbl&amp;gt; ## 1 10.</description>
-    </item>
-    
-    <item>
-      <title>Using the Parquet format with OBIS data</title>
-      <link>http://www.example.com/tutorials/arrow-obis/</link>
-      <pubDate>Tue, 01 Aug 2023 00:00:00 +0000</pubDate>
-      
-      <guid>http://www.example.com/tutorials/arrow-obis/</guid>
-      <description>What is Parquet? Parquet is a lightweight format designed for columnar storage. Its main difference when compared to other formats like csv is that Parquet is column-oriented (while csv is row-oriented). This means that Parquet is much more efficient for data accessing.To illustrate, consider the scenario of extracting data from a specific column in a CSV file. This operation entails reading through all rows across all columns. In contrast, Parquet enables selective access solely to the required column, minimizing unnecessary data retrieval.</description>
     </item>
     
   </channel>

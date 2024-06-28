@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang='en' dir='auto'><head>
+  <meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'>
+<meta name='description' content='Learn how to extract and match environmental data, such as temperature and salinity, with species occurrences obtained from the OBIS database.'>
+<meta name='theme-color' content='#0076b1'>
+
+<meta property='og:title' content='Matching environmental information with OBIS occurrences • Silas Principe'>
+<meta property='og:description' content='Learn how to extract and match environmental data, such as temperature and salinity, with species occurrences obtained from the OBIS database.'>
+<meta property='og:url' content='http://www.example.com/tutorials/env-data/'>
+<meta property='og:site_name' content='resources'>
+<meta property='og:type' content='article'><meta property='og:image' content='https://www.gravatar.com/avatar/4c5a7ea9f5ed13b0617b0aa63f544caf?s=256'><meta property='article:section' content='tutorials'><meta property='article:tag' content='r'><meta property='article:tag' content='obis'><meta property='article:published_time' content='2023-08-01T00:00:00Z'/><meta property='article:modified_time' content='2023-08-01T00:00:00Z'/><meta name='twitter:card' content='summary'><meta name='twitter:creator' content='@silasprincipe'>
+
+<meta name="generator" content="Hugo 0.88.1" />
+
+  <title>Matching environmental information with OBIS occurrences • Silas Principe</title>
+  <link rel='canonical' href='http://www.example.com/tutorials/env-data/'>
+  
+  
+  <link rel='icon' href='/favicon.ico'>
+<link rel='stylesheet' href='/assets/css/main.ab98e12b.css'><link rel='stylesheet' href='/css/custom.css'><style>
+:root{--color-accent:#0076b1;}
+</style>
+
+  
+
+</head>
+<body class='page type-tutorials has-sidebar'>
+
+  <div class='site'><div id='sidebar' class='sidebar'>
+  <a class='screen-reader-text' href='#main-menu'>Skip to Main Menu</a>
+
+  <div class='container'><section class='widget widget-about sep-after'>
+  <header>
+    
+    <div class='logo'>
+      <a href='/'>
+        <img src='/images/logo.png'>
+      </a>
+    </div>
+    
+    <h2 class='title site-title '>
+      <a href='/'>
+      resources
+      </a>
+    </h2>
+    <div class='desc'>
+    
+    </div>
+  </header>
+
+</section>
+<section class='widget widget-search sep-after'>
+  <header>
+    <h4 class='title widget-title'>Search</h4>
+  </header>
+
+  <form action='/search' id='search-form' class='search-form'>
+    <label>
+      <span class='screen-reader-text'>Search</span>
+      <input id='search-term' class='search-term' type='search' name='q' placeholder='Search&hellip;'>
+    </label></form>
+
+</section>
+<section class='widget widget-sidebar_menu sep-after'><nav id='sidebar-menu' class='menu sidebar-menu' aria-label='Sidebar Menu'>
+    <div class='container'>
+      <ul><li class='item'>
+  <a href='/'>Home</a></li><li class='item'>
+  <a href='/packages/'>Packages</a></li><li class='item has-current'>
+  <a href='/tutorials/'>Tutorials</a></li><li class='item'>
+  <a href='/find-your-dwc/'>Find your DwC</a></li><li class='item'>
+  <a href='https://manual.obis.org/'>OBIS Manual &#8599;</a></li><li class='item'>
+  <a href='https://github.com/iobis/resources'>Repo &#8599;</a></li></ul>
+    </div>
+  </nav>
+
+</section><section class='widget widget-taxonomy_cloud sep-after'>
+  <header>
+    <h4 class='title widget-title'>Tags</h4>
+  </header>
+
+  <div class='container list-container'>
+  <ul class='list taxonomy-cloud'><li>
+        <a href='/tags/obis/' style='font-size:1em'>obis</a>
+      </li><li>
+        <a href='/tags/parquet/' style='font-size:1em'>parquet</a>
+      </li><li>
+        <a href='/tags/r/' style='font-size:2em'>r</a>
+      </li></ul>
+</div>
+
+
+</section>
+<section class='widget widget-social_menu sep-after'><nav aria-label='Social Menu'>
+    <ul><li>
+        <a href='https://github.com/MunifTanjim' target='_blank' rel='noopener'>
+          <span class='screen-reader-text'>Open Github account in new tab</span><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+  
+</svg>
+</a>
+      </li><li>
+        <a href='https://twitter.com/MunifTanjim' target='_blank' rel='noopener'>
+          <span class='screen-reader-text'>Open Twitter account in new tab</span><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/>
+  
+</svg>
+</a>
+      </li><li>
+        <a href='mailto:contact@example.com' target='_blank' rel='noopener'>
+          <span class='screen-reader-text'>Contact via Email</span><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+  <polyline points="22,6 12,13 2,6"/>
+  
+</svg>
+</a>
+      </li><li>
+        <a href='https://linkedin.com/in/muniftanjim' target='_blank' rel='noopener'>
+          <span class='screen-reader-text'>Open Linkedin account in new tab</span><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
+  <rect x="2" y="9" width="4" height="12"/>
+  <circle cx="4" cy="4" r="2"/>
+  
+</svg>
+</a>
+      </li></ul>
+  </nav>
+</section></div>
+
+  <div class='sidebar-overlay'></div>
+</div><div class='main'><a class='screen-reader-text' href='#content'>Skip to Content</a>
+
+<button id='sidebar-toggler' class='sidebar-toggler' aria-controls='sidebar'>
+  <span class='screen-reader-text'>Toggle Sidebar</span>
+  <span class='open'><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <line x1="3" y1="12" x2="21" y2="12" />
+  <line x1="3" y1="6" x2="21" y2="6" />
+  <line x1="3" y1="18" x2="21" y2="18" />
+  
+</svg>
+</span>
+  <span class='close'><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <line x1="18" y1="6" x2="6" y2="18" />
+  <line x1="6" y1="6" x2="18" y2="18" />
+  
+</svg>
+</span>
+</button><div class='header-widgets'>
+        <div class='container'></div>
+      </div><header id='header' class='header site-header'>
+        <div class='container sep-after'>
+          <div class='header-info'>
+              <p class='site-title title'>resources</p>
+            <p class='desc site-desc'></p>
+          </div>
+        </div>
+      </header><main id='content'>
+
+
+<article lang='en' class='entry'>
+  <header class='header entry-header'>
+  <div class='container sep-after'>
+    <div class='header-info'>
+      <h1 class='title'>Matching environmental information with OBIS occurrences</h1>
+      
+<p class='desc'>Learn how to extract and match environmental data, such as temperature and salinity, with species occurrences obtained from the OBIS database.</p>
+
+
+    </div>
+    <div class='entry-meta'>
+  <span class='posted-on'><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+  <line x1="16" y1="2" x2="16" y2="6"/>
+  <line x1="8" y1="2" x2="8" y2="6"/>
+  <line x1="3" y1="10" x2="21" y2="10"/>
+  
+</svg>
+<span class='screen-reader-text'>Posted on </span>
+  <time class='entry-date' datetime='2023-08-01T00:00:00Z'>2023, Aug 01</time>
+</span>
+
+  <span class='byline'><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <path d="M21,21V20c0-2.76-4-5-9-5s-9,2.24-9,5v1"/>
+  <path d="M16,6.37A4,4,0,1,1,12.63,3,4,4,0,0,1,16,6.37Z"/>
+  
+</svg>
+<span class='screen-reader-text'> by </span><a href='/authors/silasprincipe'>Silas Principe</a></span>
+  
+<span class='reading-time'><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <circle cx="12" cy="12" r="10"/>
+  <polyline points="12 6 12 12 15 15"/>
+  
+</svg>
+9 mins read
+</span>
+
+
+</div>
+
+
+  </div>
+</header>
+
+  
+  
+
+  <div class='container entry-content'>
+  <h1 id="obtaining-environmental-information-for-species-occurrences">Obtaining environmental information for species occurrences</h1>
+<p>For many research questions, we are interested in the environmental
+conditions where a certain species, population, or community lives. OBIS
+already provides some environmental data along with the records. For
+example, if you download records for the species <em>Actinia equina</em>, you
+can obtain values for sea surface temperature (SST), salinity (SSS), and
+bathymetry:</p>
+<pre><code>library(robis)
+
+occ &lt;- occurrence(&quot;Actinia equina&quot;)
+
+## Retrieved 5000 records of approximately 9583 (52%)Retrieved 9583 records of
+## approximately 9583 (100%)
+
+head(occ[,c(&quot;sst&quot;, &quot;sss&quot;, &quot;bathymetry&quot;)], 4)
+
+## # A tibble: 4 × 3
+##     sst   sss bathymetry
+##   &lt;dbl&gt; &lt;dbl&gt;      &lt;dbl&gt;
+## 1  10.6  35.2        -50
+## 2  10.6  34.8        -49
+## 3  NA    NA           -7
+## 4  11.4  34.2         -4
+</code></pre>
+<p>However, there are many other variables of interest. Also, depending on
+your question, you may need another source of environmental information
+or a different resolution. Here we will explore how to extract
+environmental information for these occurrences. This tutorial will
+explore extracting data from <a href="Bio-Oracle"><strong>Bio-ORACLE</strong></a>, which
+provides essential physical, chemical, biological, and topographic data
+layers with global extent and uniform resolution. You can use the same
+code to extract data from any other data source in raster format.</p>
+<h2 id="download-data-from-bio-oracle">Download data from Bio-ORACLE</h2>
+<p>The new version of Bio-ORACLE (v3) is hosted in an ERDDAP server, which
+enable us to download only the data for the region and time period we
+need. We can use the package <a href="https://github.com/bio-oracle/biooracler"><code>biooracler</code> to download the
+layers</a>. First install the
+package. We also load the <code>terra</code> package, for spatial operations (see
+explanation on the next section).</p>
+<pre><code># install.packages(&quot;devtools&quot;)
+devtools::install_github(&quot;bio-oracle/biooracler&quot;)
+
+library(biooracler)
+library(terra)
+
+## terra 1.7.71
+
+## 
+## Attaching package: 'terra'
+
+## The following object is masked from 'package:robis':
+## 
+##     area
+</code></pre>
+<p>For our exercise we will obtain the data for species occurring in the
+Mediterranean sea. Thus, we can download the data for only this region.
+We download a shapefile of this area using the Marine Regions.</p>
+<pre><code># Install the package
+install.packages(&quot;mregions2&quot;, repos = &quot;https://ropensci.r-universe.dev&quot;)
+install.packages(&quot;wrapr&quot;)
+
+library(mregions2)
+
+## Warning: package 'mregions2' was built under R version 4.3.3
+
+library(sf)
+
+## Linking to GEOS 3.11.0, GDAL 3.5.3, PROJ 9.1.0; sf_use_s2() is TRUE
+
+med &lt;- gaz_search(1905) %&gt;%
+  gaz_geometry()
+
+plot(med, max.plot = 1, col = &quot;grey90&quot;)
+</code></pre>
+<p><img src="index_files/figure-markdown_strict/unnamed-chunk-5-1.png" alt=""></p>
+<p>From the shapefile, we can see which are the limits (longitude and
+latitude) for this area:</p>
+<pre><code>limits &lt;- st_bbox(med)
+limits
+
+##      xmin      ymin      xmax      ymax 
+## -6.032549 30.068087 36.215729 45.808914
+</code></pre>
+<p>With this information we can then download the data. We will obtain 4
+parameters: SST, salinity, bathymetry and oxygen. You can see the
+dataset IDs using the function <code>list_layers</code></p>
+<pre><code>head(list_layers()[,1:2])
+
+## Registered S3 method overwritten by 'hoardr':
+##   method           from
+##   print.cache_info httr
+
+## # A tibble: 6 × 2
+##   dataset_id                       title                                        
+##   &lt;chr&gt;                            &lt;chr&gt;                                        
+## 1 tas_baseline_2000_2020_depthsurf Bio-Oracle AirTemperature [depthSurf] Baseli…
+## 2 tas_ssp119_2020_2100_depthsurf   Bio-Oracle AirTemperature [depthSurf] SSP119…
+## 3 tas_ssp126_2020_2100_depthsurf   Bio-Oracle AirTemperature [depthSurf] SSP126…
+## 4 tas_ssp245_2020_2100_depthsurf   Bio-Oracle AirTemperature [depthSurf] SSP245…
+## 5 tas_ssp370_2020_2100_depthsurf   Bio-Oracle AirTemperature [depthSurf] SSP370…
+## 6 tas_ssp460_2020_2100_depthsurf   Bio-Oracle AirTemperature [depthSurf] SSP460…
+
+dataset_ids &lt;- c(&quot;thetao_baseline_2000_2019_depthsurf&quot;,
+                &quot;so_baseline_2000_2019_depthsurf&quot;,
+                &quot;o2_baseline_2000_2018_depthsurf&quot;)
+
+time = c('2010-01-01T00:00:00Z', '2010-01-01T00:00:00Z')
+latitude = limits[c(2,4)]
+longitude = limits[c(1,3)]
+
+constraints = list(time, latitude, longitude)
+names(constraints) = c(&quot;time&quot;, &quot;latitude&quot;, &quot;longitude&quot;)
+
+# We also need to define which variables are needed from each one. 
+# In this case we will download the mean for all
+# You can see the variables by using info_layer:
+info_layer(dataset_ids[1])
+
+## &lt;ERDDAP info&gt; thetao_baseline_2000_2019_depthsurf 
+##  Base URL: http://erddap.bio-oracle.org/erddap 
+##  Dataset Type: griddap 
+##  Dimensions (range):  
+##      time: (2000-01-01T00:00:00Z, 2010-01-01T00:00:00Z) 
+##      latitude: (-89.975, 89.975) 
+##      longitude: (-179.975, 179.975) 
+##  Variables:  
+##      thetao_ltmax: 
+##          Units: degree_C 
+##      thetao_ltmin: 
+##          Units: degree_C 
+##      thetao_max: 
+##          Units: degree_C 
+##      thetao_mean: 
+##          Units: degree_C 
+##      thetao_min: 
+##          Units: degree_C 
+##      thetao_range: 
+##          Units: degree_C
+
+variables &lt;- c(&quot;thetao_mean&quot;, &quot;so_mean&quot;, &quot;o2_mean&quot;)
+
+# To download, we need to pass the ids and variables to the function, one each time
+# You can do that using a for loop or mapply:
+download_data &lt;- function(id, variable) {
+  download_layers(id, variable, constraints, directory = &quot;.&quot;)
+}
+
+env_layers &lt;- mapply(download_data, dataset_ids, variables)
+
+## Selected dataset thetao_baseline_2000_2019_depthsurf.
+
+## Dataset info available at: http://erddap.bio-oracle.org/erddap/griddap/thetao_baseline_2000_2019_depthsurf.html
+
+## Selected 1 variables: thetao_mean
+
+## Selected dataset so_baseline_2000_2019_depthsurf.
+
+## Dataset info available at: http://erddap.bio-oracle.org/erddap/griddap/so_baseline_2000_2019_depthsurf.html
+
+## Selected 1 variables: so_mean
+
+## Selected dataset o2_baseline_2000_2018_depthsurf.
+
+## Dataset info available at: http://erddap.bio-oracle.org/erddap/griddap/o2_baseline_2000_2018_depthsurf.html
+
+## Selected 1 variables: o2_mean
+
+# We can easily convert the list of SpatRasters into a multilayer SpatRaster using `rast`
+env_layers &lt;- rast(env_layers)
+env_layers
+
+## class       : SpatRaster 
+## dimensions  : 316, 846, 3  (nrow, ncol, nlyr)
+## resolution  : 0.05, 0.05  (x, y)
+## extent      : -6.05, 36.25, 30.05, 45.85  (xmin, xmax, ymin, ymax)
+## coord. ref. : lon/lat WGS 84 
+## sources     : 605fc9b38decbff0cc9dbf7466ce9763.nc  
+##               0e41eda3a088ee25b29d4cf81ce5dd28.nc  
+##               a43ce5ec09281f9f807682ee717c2f5d.nc  
+## varnames    : thetao_mean (Average OceanTemperature) 
+##               so_mean (Average Salinity) 
+##               o2_mean (Average DissolvedMolecularOxygen) 
+## names       : thetao_bas~_depthsurf, so_baselin~_depthsurf, o2_baselin~_depthsurf 
+## unit        :              degree_C,                   PSU,            MMol' 'M-3 
+## time        : 2010-01-01 UTC
+</code></pre>
+<p>For bathymetry we need to supply a different time:</p>
+<pre><code>constraints$time &lt;- c(&quot;1970-01-01T00:00:00Z&quot;, &quot;1970-01-01T00:00:00Z&quot;)
+
+bath &lt;- download_layers(&quot;terrain_characteristics&quot;,
+                        &quot;bathymetry_mean&quot;,
+                        constraints, directory = &quot;.&quot;)
+
+## Selected dataset terrain_characteristics.
+
+## Dataset info available at: http://erddap.bio-oracle.org/erddap/griddap/terrain_characteristics.html
+
+## Selected 1 variables: bathymetry_mean
+
+bath
+
+## class       : SpatRaster 
+## dimensions  : 316, 846, 1  (nrow, ncol, nlyr)
+## resolution  : 0.05, 0.05  (x, y)
+## extent      : -6.05, 36.25, 30.05, 45.85  (xmin, xmax, ymin, ymax)
+## coord. ref. : lon/lat WGS 84 
+## source      : 9e5d27b9659e2585cd3050d884cf5151.nc 
+## varname     : bathymetry_mean (Bathymetry Mean) 
+## name        : bathymetry_mean 
+## unit        :               m 
+## time        : 1970-01-01 UTC
+</code></pre>
+<h2 id="the-terra-package">The <code>terra</code> package</h2>
+<p>For processing the raster files we will use the <a href="https://rspatial.github.io/terra/"><code>terra</code>
+package</a>. This package enable spatial
+operations on both rasters and vectors (shapefiles). Other packages
+exist for raster operations
+(e.g. <a href="https://r-spatial.github.io/stars/"><code>stars</code></a>), but for many of
+the main operations <code>terra</code> provides a simple syntax and is very fast.
+To learn how to use <code>terra</code>, a good resource is this website:
+<a href="https://rspatial.org/index.html">rspatial.org/terra</a></p>
+<p>Here we will use both <strong>rasters</strong> and <strong>vectors</strong>. In geospatial data,
+rasters represent data as a grid of cells or pixels, each with a
+specific value, suitable for continuous data like temperature or
+elevation. Rasters can have multiple layers, as the one we loaded as
+<code>env_layers</code>. Vectors represent data as points, lines, or polygons. In
+our case, we have a vector for the boundaries of the Mediterranean which
+we loaded using <code>sf</code>. We can convert to the terra format, <code>SpatVector</code>
+using <code>vect</code>:</p>
+<pre><code>med &lt;- vect(med)
+
+par(mfrow = c(1,2))
+plot(env_layers[[1]], main = &quot;Raster&quot;)
+plot(med, main = &quot;Vector&quot;)
+</code></pre>
+<p><img src="index_files/figure-markdown_strict/unnamed-chunk-10-1.png" alt=""></p>
+<p>We will mask our raster, to ensure that we only have the data for the
+areas of the Mediterranean. To make easier to extract the data all at
+once, we will join the bathymetry layer with the others:</p>
+<pre><code>all_layers &lt;- c(env_layers, bath)
+
+all_layers &lt;- terra::mask(all_layers, med)
+
+# Change names for easier handling
+names(all_layers) &lt;- c(&quot;sst&quot;, &quot;salinity&quot;, &quot;o2&quot;, &quot;depth&quot;)
+plot(all_layers, main = names(all_layers))
+</code></pre>
+<p><img src="index_files/figure-markdown_strict/unnamed-chunk-11-1.png" alt=""></p>
+<p>TIP: Note that for <code>mask</code> we used the package prefix
+(i.e. <code>terra::mask()</code>). Some names such as <strong>mask</strong> or <strong>extract</strong> are
+also used by other packages, namely those from <code>tidyverse</code>. Using the
+prefix avoid that the wrong function is used.</p>
+<h2 id="extracting-data">Extracting data</h2>
+<p>Let’s download some data from OBIS now. We will get data for all species
+in the order Actiniaria within that region:</p>
+<pre><code>target_area &lt;- st_as_text(st_as_sfc(st_bbox(env_layers[[1]])))
+
+actiniaria &lt;- occurrence(&quot;Actiniaria&quot;, geometry = target_area,
+                         # Limit to some fields that we need here
+                         fields = c(&quot;taxonID&quot;, &quot;scientificName&quot;, &quot;decimalLongitude&quot;, &quot;decimalLatitude&quot;, &quot;speciesid&quot;))
+
+## Retrieved 2289 records of approximately 2289 (100%)
+
+# Filter for only those at species level
+actiniaria &lt;- actiniaria[!is.na(actiniaria$speciesid), ]
+</code></pre>
+<p>For extraction operations with <code>terra</code> you can work with <code>data.frames</code>.
+But we will convert it to a <code>SpatVector</code> to use some other interesting
+functions. For example, we can mask our points according to the
+Mediterranean borders.</p>
+<pre><code>actiniaria_vec &lt;- vect(actiniaria, geom = c(&quot;decimalLongitude&quot;, &quot;decimalLatitude&quot;), crs = &quot;EPSG:4326&quot;)
+
+actiniaria_vec_filt &lt;- terra::mask(actiniaria_vec, med)
+
+par(mfrow = c(1,2))
+plot(actiniaria_vec, pch = 20, cex = 1, col = &quot;blue&quot;, main = &quot;Not masked&quot;);lines(med)
+plot(actiniaria_vec_filt, pch = 20, cex = 1, col = &quot;blue&quot;, main = &quot;Masked&quot;);lines(med)
+</code></pre>
+<p><img src="index_files/figure-markdown_strict/unnamed-chunk-13-1.png" alt=""></p>
+<p>Now we are ready to extract the data. This is very simple:</p>
+<pre><code>extracted_data &lt;- terra::extract(all_layers, actiniaria_vec_filt, ID = FALSE)
+
+head(extracted_data)
+
+##        sst salinity       o2       depth
+## 1 19.87718 37.68975 232.8744   -82.69444
+## 2 20.48257 38.04504 225.7063 -1223.72217
+## 3 19.97063 37.62606 232.0623  -159.08333
+## 4 19.63475 37.98786 235.2972   -39.00000
+## 5 19.51212 36.99345 233.4251     0.00000
+## 6 20.04503 37.58446 231.0133   -52.30556
+</code></pre>
+<p>As you can see, it extracted the environmental infromation for all
+points. We can get a good summary with <code>summary</code></p>
+<pre><code>summary(extracted_data)
+
+##       sst           salinity           o2            depth         
+##  Min.   :16.66   Min.   :30.88   Min.   :216.9   Min.   :-3020.19  
+##  1st Qu.:19.41   1st Qu.:37.47   1st Qu.:231.1   1st Qu.:  -87.08  
+##  Median :19.83   Median :37.65   Median :232.6   Median :  -57.72  
+##  Mean   :19.51   Mean   :37.43   Mean   :234.5   Mean   : -131.32  
+##  3rd Qu.:20.00   3rd Qu.:37.83   3rd Qu.:235.3   3rd Qu.:  -29.36  
+##  Max.   :23.61   Max.   :39.35   Max.   :278.3   Max.   :    0.00  
+##  NA's   :135     NA's   :135     NA's   :135     NA's   :135
+</code></pre>
+<p>Note that we have 135 NA points, i.e. with no information. Those points
+are probably on land. You may chose to remove those or you can find the
+nearest valid point. In our case we will simply remove them.</p>
+<pre><code>actiniaria_vec_filt &lt;- cbind(actiniaria_vec_filt, extracted_data)
+
+actiniaria_vec_filt &lt;- actiniaria_vec_filt[!is.na(actiniaria_vec_filt$sst),]
+</code></pre>
+<h1 id="plotting-this-information">Plotting this information</h1>
+<p>There are different ways to plot this information. A good way of having
+an overview is by using a histogram. We will use <code>dplyr</code>, <code>tidyr</code> and
+<code>ggplot2</code> for that.</p>
+<pre><code>library(dplyr)
+
+## 
+## Attaching package: 'dplyr'
+
+## The following objects are masked from 'package:terra':
+## 
+##     intersect, union
+
+## The following objects are masked from 'package:stats':
+## 
+##     filter, lag
+
+## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+
+library(tidyr)
+
+## 
+## Attaching package: 'tidyr'
+
+## The following object is masked from 'package:terra':
+## 
+##     extract
+
+library(ggplot2)
+
+extracted_data &lt;- as.data.frame(actiniaria_vec_filt) %&gt;%
+  select(sst, salinity, o2, depth)
+
+extracted_data_long &lt;- pivot_longer(extracted_data, cols = 1:4, names_to = &quot;variable&quot;, values_to = &quot;value&quot;)
+
+head(extracted_data_long)
+
+## # A tibble: 6 × 2
+##   variable value
+##   &lt;chr&gt;    &lt;dbl&gt;
+## 1 sst       19.9
+## 2 salinity  37.7
+## 3 o2       233. 
+## 4 depth    -82.7
+## 5 sst       20.5
+## 6 salinity  38.0
+
+ggplot(extracted_data_long) +
+  geom_histogram(aes(value, fill = variable)) +
+  scale_fill_manual(values = c(&quot;#fb8500&quot;, &quot;#ffb703&quot;, &quot;#023047&quot;, &quot;#219ebc&quot;)) +
+  theme_light() + theme(legend.position = &quot;none&quot;) +
+  facet_wrap(~ variable, scales = &quot;free_x&quot;)
+
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+</code></pre>
+<p><img src="index_files/figure-markdown_strict/unnamed-chunk-17-1.png" alt=""></p>
+<p>Another possible way is to display geographically. We can do that for
+temperature for example:</p>
+<pre><code># We get a shapefile of the continents
+wrld &lt;- rnaturalearth::ne_countries(returnclass = &quot;sf&quot;)
+
+# Convert the data to sf format, as ggplot2 have nice features for sf
+actiniaria_vec_filt &lt;- st_as_sf(actiniaria_vec_filt)
+
+ggplot() +
+  geom_sf(data = wrld, color = &quot;grey80&quot;, fill = &quot;grey90&quot;) +
+  geom_sf(data = actiniaria_vec_filt, aes(color = sst), size = 2, alpha = .5) +
+  scale_color_distiller(palette = &quot;BuPu&quot;, direction = 1) +
+  coord_sf(xlim = limits[c(1,3)], ylim = limits[c(2,4)]) +
+  ggtitle(&quot;Actiniaria&quot;) +
+  theme_light() +
+  theme(legend.position = &quot;bottom&quot;)
+</code></pre>
+<p><img src="index_files/figure-markdown_strict/unnamed-chunk-18-1.png" alt=""></p>
+<p>In a next tutorial we will explore how to download environmental data
+from other sources, like Copernicus or NOAA, what opens many
+possibilities of research.</p>
+
+</div>
+
+  
+<footer class='entry-footer'>
+  <div class='container sep-before'><div class='categories'><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <path d="M22,19a2,2,0,0,1-2,2H4a2,2,0,0,1-2-2V5A2,2,0,0,1,4,3H9l2,3h9a2,2,0,0,1,2,2Z"/>
+  
+</svg>
+<span class='screen-reader-text'>Categories: </span><a class='category' href='/categories/tutorial/'>tutorial</a>, <a class='category' href='/categories/r/'>r</a>, <a class='category' href='/categories/environmental-information/'>environmental-information</a></div>
+<div class='tags'><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <path d="M20.59,13.41l-7.17,7.17a2,2,0,0,1-2.83,0L2,12V2H12l8.59,8.59A2,2,0,0,1,20.59,13.41Z"/>
+  <line x1="7" y1="7" x2="7" y2="7"/>
+  
+</svg>
+<span class='screen-reader-text'>Tags: </span><a class='tag' href='/tags/r/'>r</a>, <a class='tag' href='/tags/obis/'>obis</a></div>
+
+  </div>
+</footer>
+
+
+</article>
+
+<nav class='entry-nav'>
+  <div class='container'><div class='prev-entry sep-before'>
+      <a href='/tutorials/arrow-obis/'>
+        <span aria-hidden='true'><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <line x1="20" y1="12" x2="4" y2="12"/>
+  <polyline points="10 18 4 12 10 6"/>
+  
+</svg>
+ Previous</span>
+        <span class='screen-reader-text'>Previous post: </span>Using the Parquet format with OBIS data</a>
+    </div></div>
+</nav>
+
+
+
+
+      </main>
+
+      <footer id='footer' class='footer'>
+        <div class='container sep-before'><div class='copyright'>
+  <p> &copy; 2023-2024 Ocean Biodiversity Information System (OBIS) </p>
+</div>
+
+        </div>
+      </footer>
+
+    </div>
+  </div><script>window.__assets_js_src="/assets/js/"</script>
+
+<script src='/assets/js/main.c3bcf2df.js'></script><script src='/js/custom.js'></script>
+
+</body>
+
+</html>
+

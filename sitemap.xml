@@ -21,6 +21,15 @@
     <loc>http://www.example.com/categories/data-manipulation/</loc>
     <lastmod>2023-08-01T00:00:00+00:00</lastmod>
   </url><url>
+    <loc>http://www.example.com/categories/environmental-information/</loc>
+    <lastmod>2023-08-01T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>http://www.example.com/tutorials/env-data/</loc>
+    <lastmod>2023-08-01T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>http://www.example.com/tags/obis/</loc>
+    <lastmod>2023-08-01T00:00:00+00:00</lastmod>
+  </url><url>
     <loc>http://www.example.com/tags/parquet/</loc>
     <lastmod>2023-08-01T00:00:00+00:00</lastmod>
   </url><url>
