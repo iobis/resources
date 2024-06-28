@@ -1,3 +1,15 @@
+---
+title: "Matching environmental information with OBIS occurrences"
+description: "Learn how to extract and match environmental data, such as temperature and salinity, with species occurrences obtained from the OBIS database."
+authors: [silasprincipe]
+date: 2023-08-01
+categories: ["tutorial", "r", "environmental-information"]
+tags: ["r", "obis"]
+output: 
+  md_document:
+    preserve_yaml: true
+---
+
 # Obtaining environmental information for species occurrences
 
 For many research questions, we are interested in the environmental
