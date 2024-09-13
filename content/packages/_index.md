@@ -41,13 +41,44 @@ GitHub: https://github.com/iobis/robis
 </div>
 {{< /rawhtml >}}
 
+{{< rawhtml >}}
+<div class="package-box-container">
+<div class="package-box">
+{{< /rawhtml >}}
 ##### `obistools`
 
+`obistools` is an R package designed with tools for data enhancement and ensuring data quality. It includes a range of functions to support comprehensive quality control checks, such as: taxon matching, verifying required OBIS fields, verifying identifiers, and detecting issues with geographic coordinates such as depth inconsistencies or points located on land.
+
+This package requires `devtools` to be installed:
+
+```r
+install.packages("devtools")
+devtools::install_github("iobis/obistools")
+```
+See the GitHub for more documentation: https://github.com/iobis/obistools
+{{< rawhtml >}}
+</div>
+</div>
+{{< /rawhtml >}}
+
 ##### `obisdi`
+
 
 -------
 
 ### Python
+
+{{< rawhtml >}}
+<div class="package-box-container">
+<div class="package-box">
+{{< /rawhtml >}}
+#####  pyobis
+
+`pyobis` is a python package to help users fetch data from the OBIS API. It has similar functions as `robis` for obtaining data, including `occurrence`, `taxon`, `node`, `checklist` and `dataset`. For more information see: https://github.com/iobis/pyobis
+{{< rawhtml >}}
+</div>
+</div>
+{{< /rawhtml >}}
 
 -------
 
