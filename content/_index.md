@@ -10,7 +10,9 @@ OBIS is not just a repository for biodiversity data. It's also a community of pr
 
 You can contribute with tutorials following the guidelines available [at our repository](https://github.com/iobis/resources).
 
-Don't know where to start? We suggest reading the [OBIS manual](https://manual.obis.org/) where you will find the most complete guide about how OBIS works and the different types of data available. Video tutorial playlists are also available from the ![](youtube-logo.png){height="15px" width="20px"} [OBIS YouTube channel](https://www.youtube.com/@oceanbiodiversityinformati6931/playlists). Some highlights from our How-To videos include:
+Don't know where to start? We suggest reading the [OBIS manual](https://manual.obis.org/) where you will find the most complete guide about how OBIS works and the different types of data available. Video tutorial playlists are also available from the <img src="youtube-logo.png" alt="YouTube logo" style="width: 2%; height: auto;"> [OBIS YouTube channel](https://www.youtube.com/@oceanbiodiversityinformati6931/playlists). Some highlights from our How-To videos include:
+
+
 
 * How to [construct eventIDs](https://www.youtube.com/watch?v=Upt6LPJ0Bn8&list=PLlgUwSvpCFS4TS7ZN0fhByj_3EBZ5lXbF&index=2&t=6s)
 * How to create and format the [Event](https://www.youtube.com/watch?v=jyy6QO_p7v8&list=PLlgUwSvpCFS4TS7ZN0fhByj_3EBZ5lXbF&index=4), [Occurrence](https://www.youtube.com/watch?v=G_AmAmS7ILc&list=PLlgUwSvpCFS4TS7ZN0fhByj_3EBZ5lXbF&index=5), and [eMoF](https://www.youtube.com/watch?v=EjM0HRrF1B4&list=PLlgUwSvpCFS4TS7ZN0fhByj_3EBZ5lXbF&index=6) tables
