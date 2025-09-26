@@ -5,11 +5,20 @@
     <link>http://www.example.com/tags/</link>
     <description>Recent content in Tags on resources</description>
     <generator>Hugo -- gohugo.io</generator>
-    <lastBuildDate>Tue, 01 Aug 2023 00:00:00 +0000</lastBuildDate><atom:link href="http://www.example.com/tags/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Fri, 26 Sep 2025 00:00:00 +0000</lastBuildDate><atom:link href="http://www.example.com/tags/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>duckdb</title>
+      <link>http://www.example.com/tags/duckdb/</link>
+      <pubDate>Fri, 26 Sep 2025 00:00:00 +0000</pubDate>
+      
+      <guid>http://www.example.com/tags/duckdb/</guid>
+      <description></description>
+    </item>
+    
     <item>
       <title>obis</title>
       <link>http://www.example.com/tags/obis/</link>
-      <pubDate>Tue, 01 Aug 2023 00:00:00 +0000</pubDate>
+      <pubDate>Fri, 26 Sep 2025 00:00:00 +0000</pubDate>
       
       <guid>http://www.example.com/tags/obis/</guid>
       <description></description>
@@ -18,7 +27,7 @@
     <item>
       <title>parquet</title>
       <link>http://www.example.com/tags/parquet/</link>
-      <pubDate>Tue, 01 Aug 2023 00:00:00 +0000</pubDate>
+      <pubDate>Fri, 26 Sep 2025 00:00:00 +0000</pubDate>
       
       <guid>http://www.example.com/tags/parquet/</guid>
       <description></description>
@@ -27,9 +36,18 @@
     <item>
       <title>r</title>
       <link>http://www.example.com/tags/r/</link>
-      <pubDate>Tue, 01 Aug 2023 00:00:00 +0000</pubDate>
+      <pubDate>Fri, 26 Sep 2025 00:00:00 +0000</pubDate>
       
       <guid>http://www.example.com/tags/r/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>spatial</title>
+      <link>http://www.example.com/tags/spatial/</link>
+      <pubDate>Fri, 26 Sep 2025 00:00:00 +0000</pubDate>
+      
+      <guid>http://www.example.com/tags/spatial/</guid>
       <description></description>
     </item>
     

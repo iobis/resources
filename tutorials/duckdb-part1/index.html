@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang='en' dir='auto'><head>
+  <meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'>
+<meta name='description' content='OBIS now has a full export in GeoParquet format, but to work with large datasets you need the right tools. Here we explore how you can use DuckDB to (very) fastly retrieve data from this resource.'>
+<meta name='theme-color' content='#0076b1'>
+
+<meta property='og:title' content='Using DuckDB to query the OBIS full export - Part 1 • Silas Principe'>
+<meta property='og:description' content='OBIS now has a full export in GeoParquet format, but to work with large datasets you need the right tools. Here we explore how you can use DuckDB to (very) fastly retrieve data from this resource.'>
+<meta property='og:url' content='http://www.example.com/tutorials/duckdb-part1/'>
+<meta property='og:site_name' content='resources'>
+<meta property='og:type' content='article'><meta property='og:image' content='https://www.gravatar.com/avatar/4c5a7ea9f5ed13b0617b0aa63f544caf?s=256'><meta property='article:section' content='tutorials'><meta property='article:tag' content='r'><meta property='article:tag' content='obis'><meta property='article:tag' content='parquet'><meta property='article:tag' content='duckdb'><meta property='article:published_time' content='2025-09-26T00:00:00Z'/><meta property='article:modified_time' content='2025-09-26T00:00:00Z'/><meta name='twitter:card' content='summary'><meta name='twitter:creator' content='@silasprincipe'>
+
+<meta name="generator" content="Hugo 0.88.1" />
+
+  <title>Using DuckDB to query the OBIS full export - Part 1 • Silas Principe</title>
+  <link rel='canonical' href='http://www.example.com/tutorials/duckdb-part1/'>
+  
+  
+  <link rel='icon' href='/favicon.ico'>
+<link rel='stylesheet' href='/assets/css/main.ab98e12b.css'><link rel='stylesheet' href='/css/custom.css'><style>
+:root{--color-accent:#0076b1;}
+</style>
+
+  
+
+</head>
+<body class='page type-tutorials has-sidebar'>
+
+  <div class='site'><div id='sidebar' class='sidebar'>
+  <a class='screen-reader-text' href='#main-menu'>Skip to Main Menu</a>
+
+  <div class='container'><section class='widget widget-about sep-after'>
+  <header>
+    
+    <div class='logo'>
+      <a href='/'>
+        <img src='/images/logo.png'>
+      </a>
+    </div>
+    
+    <h2 class='title site-title '>
+      <a href='/'>
+      resources
+      </a>
+    </h2>
+    <div class='desc'>
+    
+    </div>
+  </header>
+
+</section>
+<section class='widget widget-search sep-after'>
+  <header>
+    <h4 class='title widget-title'>Search</h4>
+  </header>
+
+  <form action='/search' id='search-form' class='search-form'>
+    <label>
+      <span class='screen-reader-text'>Search</span>
+      <input id='search-term' class='search-term' type='search' name='q' placeholder='Search&hellip;'>
+    </label></form>
+
+</section>
+<section class='widget widget-sidebar_menu sep-after'><nav id='sidebar-menu' class='menu sidebar-menu' aria-label='Sidebar Menu'>
+    <div class='container'>
+      <ul><li class='item'>
+  <a href='/'>Home</a></li><li class='item'>
+  <a href='/packages/'>Packages</a></li><li class='item has-current'>
+  <a href='/tutorials/'>Tutorials</a></li><li class='item'>
+  <a href='/find-your-dwc/'>Find your DwC</a></li><li class='item'>
+  <a href='https://manual.obis.org/'>OBIS Manual &#8599;</a></li><li class='item'>
+  <a href='https://github.com/iobis/resources'>Repo &#8599;</a></li></ul>
+    </div>
+  </nav>
+
+</section><section class='widget widget-taxonomy_cloud sep-after'>
+  <header>
+    <h4 class='title widget-title'>Tags</h4>
+  </header>
+
+  <div class='container list-container'>
+  <ul class='list taxonomy-cloud'><li>
+        <a href='/tags/duckdb/' style='font-size:1.3333333333333333em'>duckdb</a>
+      </li><li>
+        <a href='/tags/obis/' style='font-size:1.6666666666666665em'>obis</a>
+      </li><li>
+        <a href='/tags/parquet/' style='font-size:1.6666666666666665em'>parquet</a>
+      </li><li>
+        <a href='/tags/r/' style='font-size:2em'>r</a>
+      </li><li>
+        <a href='/tags/spatial/' style='font-size:1em'>spatial</a>
+      </li></ul>
+</div>
+
+
+</section>
+<section class='widget widget-social_menu sep-after'><nav aria-label='Social Menu'>
+    <ul><li>
+        <a href='https://github.com/MunifTanjim' target='_blank' rel='noopener'>
+          <span class='screen-reader-text'>Open Github account in new tab</span><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+  
+</svg>
+</a>
+      </li><li>
+        <a href='https://twitter.com/MunifTanjim' target='_blank' rel='noopener'>
+          <span class='screen-reader-text'>Open Twitter account in new tab</span><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/>
+  
+</svg>
+</a>
+      </li><li>
+        <a href='mailto:contact@example.com' target='_blank' rel='noopener'>
+          <span class='screen-reader-text'>Contact via Email</span><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+  <polyline points="22,6 12,13 2,6"/>
+  
+</svg>
+</a>
+      </li><li>
+        <a href='https://linkedin.com/in/muniftanjim' target='_blank' rel='noopener'>
+          <span class='screen-reader-text'>Open Linkedin account in new tab</span><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
+  <rect x="2" y="9" width="4" height="12"/>
+  <circle cx="4" cy="4" r="2"/>
+  
+</svg>
+</a>
+      </li></ul>
+  </nav>
+</section></div>
+
+  <div class='sidebar-overlay'></div>
+</div><div class='main'><a class='screen-reader-text' href='#content'>Skip to Content</a>
+
+<button id='sidebar-toggler' class='sidebar-toggler' aria-controls='sidebar'>
+  <span class='screen-reader-text'>Toggle Sidebar</span>
+  <span class='open'><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <line x1="3" y1="12" x2="21" y2="12" />
+  <line x1="3" y1="6" x2="21" y2="6" />
+  <line x1="3" y1="18" x2="21" y2="18" />
+  
+</svg>
+</span>
+  <span class='close'><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <line x1="18" y1="6" x2="6" y2="18" />
+  <line x1="6" y1="6" x2="18" y2="18" />
+  
+</svg>
+</span>
+</button><div class='header-widgets'>
+        <div class='container'></div>
+      </div><header id='header' class='header site-header'>
+        <div class='container sep-after'>
+          <div class='header-info'>
+              <p class='site-title title'>resources</p>
+            <p class='desc site-desc'></p>
+          </div>
+        </div>
+      </header><main id='content'>
+
+
+<article lang='en' class='entry'>
+  <header class='header entry-header'>
+  <div class='container sep-after'>
+    <div class='header-info'>
+      <h1 class='title'>Using DuckDB to query the OBIS full export - Part 1</h1>
+      
+<p class='desc'>OBIS now has a full export in GeoParquet format, but to work with large datasets you need the right tools. Here we explore how you can use DuckDB to (very) fastly retrieve data from this resource.</p>
+
+
+    </div>
+    <div class='entry-meta'>
+  <span class='posted-on'><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+  <line x1="16" y1="2" x2="16" y2="6"/>
+  <line x1="8" y1="2" x2="8" y2="6"/>
+  <line x1="3" y1="10" x2="21" y2="10"/>
+  
+</svg>
+<span class='screen-reader-text'>Posted on </span>
+  <time class='entry-date' datetime='2025-09-26T00:00:00Z'>2025, Sep 26</time>
+</span>
+
+  <span class='byline'><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <path d="M21,21V20c0-2.76-4-5-9-5s-9,2.24-9,5v1"/>
+  <path d="M16,6.37A4,4,0,1,1,12.63,3,4,4,0,0,1,16,6.37Z"/>
+  
+</svg>
+<span class='screen-reader-text'> by </span><a href='/authors/silasprincipe'>Silas Principe</a></span>
+  
+<span class='reading-time'><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <circle cx="12" cy="12" r="10"/>
+  <polyline points="12 6 12 12 15 15"/>
+  
+</svg>
+7 mins read
+</span>
+
+
+</div>
+
+
+  </div>
+</header>
+
+  
+  
+
+  <div class='container entry-content'>
+  <h1 id="the-obis-full-export">The OBIS full export</h1>
+<p>OBIS has more than 160 million occurrence records available (and growing!). Previously you could download the <a href="https://obis.org/data/access/">full export</a> as a single Parquet file and do a range of analysis with it, but since recently the full export <a href="https://github.com/iobis/obis-open-data">became available in AWS</a> through the <a href="https://aws.amazon.com/opendata/">Open Data Program</a>. This came with a total update of the way the data is offered. Now the full export is offered as a dataset of <a href="https://geoparquet.org/">GeoParquet</a> files, what opens up a world of possibilities in doing spatial analysis with the data, and also make analysis much more efficient and cloud performant. This new version also contains all measurements of the <a href="https://manual.obis.org/data_format.html#extendedmeasurementorfact-extension-emof">eMoF extension</a>.</p>
+<p>There are two ways you can access this dataset: download it locally or access directly from the AWS bucket. In both cases, we need the right tools to work with it. So, let&rsquo;s dive in this three parts tutorial. On the first part we will talk about <a href="https://duckdb.org/"><strong>DuckDB</strong></a>, and how to do basic SQL queries. On the second part we will check the spatial capabilities of DuckDB. Finally, on the third part we will explore duckplyr, an R package that brings the tidyverse grammar to work with DuckDB on R.</p>
+<blockquote>
+<p><strong>Note</strong></p>
+<p>Are you a Python user? Worry thy not - the SQL syntax we will discuss here is the same you need to use on Python with the <code>duckdb</code> library. But it is on our to-do list to add Python examples to this tutorial!</p>
+</blockquote>
+<blockquote>
+<p><strong>Work together</strong></p>
+<p>We have created a Jupyter Notebook, so you can work through this tutorial together with us. You can either <a href="https://github.com/iobis/resources/blob/main/content/tutorials/duckdb-part1/duckdb-part1.ipynb">download it locally</a> or, even easier, open it through <strong>Google Colab</strong>. Just <a href="https://colab.research.google.com/github/iobis/resources/blob/main/content/tutorials/duckdb-part1/duckdb-part1.ipynb">click here</a> to go there.</p>
+</blockquote>
+<h2 id="a-quick-word-about-geoparquets">A quick word about GeoParquets</h2>
+<p>We already talked about Parquet and its many benefits in a previous tutorial. <a href="https://geoparquet.org/">GeoParquet</a> extends the core Parquet to efficiently store and query geospatial vector data. It adds a geometry column, and some geospatial metadata to the file. It means that we can very quickly filter data that is on a certain region, for example. More on that on the <a href="http://www.example.com/tutorials/duckdb-part2/">next tutorial</a>.</p>
+<h2 id="and-what-is-duckdb">And what is DuckDB?</h2>
+<p><a href="https://duckdb.org/">DuckDB</a> is a lightweight SQL database designed for analytics. It makes it easy to query large files like CSVs or Parquet, and can speed up your analytical workflow. DuckDB have APIs for many languages, including R and Python.</p>
+<p>To use DuckDB you need to learn SQL (Structured Query Language), the standard language used to work with databases. There are many versions of the SQL language, depending on the management system you are dealing with (e.g. MySQL, PostgreSQL, etc.), and DuckDB also has its own version, which you can learn in <a href="https://duckdb.org/docs/stable/sql/introduction">their documentation</a>. <strong>We will not go in depth on the SQL language, but just provide you with the basic commands to start!</strong></p>
+<h3 id="essential-sql-commands">Essential SQL commands</h3>
+<ul>
+<li>SELECT: retrieves data from a table</li>
+<li>FROM: which table to get the data from</li>
+<li>WHERE: filters rows based on a condition</li>
+<li>ORDER BY: sorts the results</li>
+<li>LIMIT: restricts how many rows are returned</li>
+<li>GROUP BY: groups rows so you can calculate things like sums, counts, or averages</li>
+</ul>
+<p>A simple SQL query from a Parquet file would look like that:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">SELECT</span> AphiaID, <span style="color:#66d9ef">COUNT</span>(<span style="color:#f92672">*</span>) <span style="color:#66d9ef">AS</span> records
+<span style="color:#66d9ef">FROM</span> read_parquet(<span style="color:#e6db74">&#39;../obis_full_export.parquet&#39;</span>)
+<span style="color:#66d9ef">WHERE</span> family <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;Acanthuridae&#39;</span>
+<span style="color:#66d9ef">GROUP</span> <span style="color:#66d9ef">BY</span> AphiaID
+<span style="color:#66d9ef">ORDER</span> <span style="color:#66d9ef">BY</span> records <span style="color:#66d9ef">DESC</span>;
+</code></pre></div><blockquote>
+<p><strong>Note</strong></p>
+<p>Usually SQL commands are written on UPPERCASE, but that is not necessary for DuckDB calls - indeed, in our in-house code you will usually find all commands in lower case.</p>
+</blockquote>
+<h1 id="lets-do-some-analysis">Let&rsquo;s do some analysis</h1>
+<p>Ok, now that we have the basic knowledge of SQL, we can start exploring the OBIS full export. As we said, <strong>you can access it directly from AWS</strong>, but our experience shows that for normal internet connections, it is better to have a local copy instead. But to help you understand how you can access it directly from AWS, we will first show queries in another dataset, <a href="https://github.com/iobis/speciesgrids">the <code>speciesgrids</code></a>, which provides a gridded version of all marine data in OBIS and GBIF.</p>
+<p>We will start by doing a very simple query - we will get the number of records for each species in the family <a href="https://obis.org/taxon/125515">Acanthuridae</a>. Just to prove that DuckDB is very fast, we will compare the same query done with the package <a href="https://arrow.apache.org/docs/r/index.html"><code>arrow</code></a>.</p>
+<p>Since we are working with the online version of the <strong>speciesgrids</strong>, we will need to install a DuckDB extension. <a href="https://duckdb.org/docs/stable/extensions/overview">Extensions</a> expand the capabilities of DuckDB, and are an amazing resource.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">suppressPackageStartupMessages</span>(<span style="color:#a6e22e">library</span>(arrow)) <span style="color:#75715e"># For parquet queries</span>
+<span style="color:#a6e22e">suppressPackageStartupMessages</span>(<span style="color:#a6e22e">library</span>(dplyr)) <span style="color:#75715e"># For some analysis</span>
+<span style="color:#a6e22e">suppressPackageStartupMessages</span>(<span style="color:#a6e22e">library</span>(duckdb)) <span style="color:#75715e"># Our main package</span>
+<span style="color:#a6e22e">suppressPackageStartupMessages</span>(<span style="color:#a6e22e">library</span>(tictoc)) <span style="color:#75715e"># To get timings</span>
+<span style="color:#a6e22e">suppressPackageStartupMessages</span>(<span style="color:#a6e22e">library</span>(glue)) <span style="color:#75715e"># To easily make the queries text</span>
+
+speciesgrids <span style="color:#f92672">&lt;-</span> <span style="color:#e6db74">&#34;s3://obis-products/speciesgrids/h3_7&#34;</span>
+
+<span style="color:#75715e"># To work with DuckDB, we need to start by oppening a</span>
+<span style="color:#75715e"># connection to an in-memory database, using the DBI package</span>
+con <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">dbConnect</span>(<span style="color:#a6e22e">duckdb</span>())
+
+<span style="color:#75715e"># Install the httpfs extension</span>
+<span style="color:#a6e22e">dbSendQuery</span>(con, <span style="color:#e6db74">&#34;install httpfs; load httpfs;&#34;</span>)
+
+<span style="color:#75715e"># Let&#39;s check first with Arrow</span>
+<span style="color:#a6e22e">tic</span>(<span style="color:#e6db74">&#34;arrow query&#34;</span>)
+ds <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">open_dataset</span>(speciesgrids)
+
+acanthuridae_counts_arrow <span style="color:#f92672">&lt;-</span> ds <span style="color:#f92672">|&gt;</span>
+    <span style="color:#a6e22e">filter</span>(family <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;Acanthuridae&#34;</span>) <span style="color:#f92672">|&gt;</span>
+    <span style="color:#a6e22e">group_by</span>(AphiaID) <span style="color:#f92672">|&gt;</span>
+    <span style="color:#a6e22e">summarise</span>(total_records <span style="color:#f92672">=</span> <span style="color:#a6e22e">sum</span>(records)) <span style="color:#f92672">|&gt;</span>
+    <span style="color:#a6e22e">collect</span>() <span style="color:#f92672">|&gt;</span>
+    <span style="color:#a6e22e">arrange</span>(<span style="color:#a6e22e">desc</span>(total_records))
+<span style="color:#a6e22e">toc</span>()
+</code></pre></div><pre><code>arrow query: 17.2 sec elapsed
+</code></pre>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#75715e"># DuckDB query</span>
+<span style="color:#a6e22e">tic</span>(<span style="color:#e6db74">&#34;DuckDB query&#34;</span>)
+acanthuridae_counts <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">dbGetQuery</span>(con, <span style="color:#a6e22e">glue</span>(
+    <span style="color:#e6db74">&#34;
+</span><span style="color:#e6db74">    SELECT AphiaID, SUM(records) AS total_records
+</span><span style="color:#e6db74">    FROM read_parquet(&#39;{speciesgrids}/*&#39;)
+</span><span style="color:#e6db74">    WHERE family = &#39;Acanthuridae&#39;
+</span><span style="color:#e6db74">    GROUP BY AphiaID
+</span><span style="color:#e6db74">    ORDER BY total_records DESC;
+</span><span style="color:#e6db74">    &#34;</span>
+))
+<span style="color:#a6e22e">toc</span>()
+</code></pre></div><pre><code>DuckDB query: 18.781 sec elapsed
+</code></pre>
+<p>Note that for DuckDB we had to add <code>/*</code> to the source (so it became <code>s3://obis-products/speciesgrids/h3_7/*</code>), telling that it should search all objects within that folder.</p>
+<p>The resulting object looks like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#75715e"># Arrow version</span>
+<span style="color:#a6e22e">head</span>(acanthuridae_counts_arrow, <span style="color:#ae81ff">3</span>)
+</code></pre></div><pre><code># A tibble: 3 × 2
+  AphiaID total_records
+    &lt;int&gt;         &lt;int&gt;
+1  159581        183256
+2  159578        176533
+3  159580        125576
+</code></pre>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#75715e"># DuckDB version</span>
+<span style="color:#a6e22e">head</span>(acanthuridae_counts, <span style="color:#ae81ff">3</span>)
+</code></pre></div><pre><code>  AphiaID total_records
+1  159581        183256
+2  159578        176533
+3  159580        125576
+</code></pre>
+<p>Now, for the <strong>full export</strong>. You can download it locally from the link available here: <a href="https://obis.org/data/access/">https://obis.org/data/access/</a></p>
+<p>We will again get the number of records by species on the Acanthuridae family. But this time, we will get it by year.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#75715e"># Put here the path to your downloaded full export</span>
+full_export <span style="color:#f92672">&lt;-</span> <span style="color:#e6db74">&#34;/Volumes/OBIS2/obis_20250318_parquet/occurrence&#34;</span>
+
+<span style="color:#75715e"># DuckDB query</span>
+<span style="color:#a6e22e">tic</span>(<span style="color:#e6db74">&#34;DuckDB query on full export&#34;</span>)
+acanthuridae_by_year <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">dbGetQuery</span>(con, <span style="color:#a6e22e">glue</span>(
+    <span style="color:#e6db74">&#34;
+</span><span style="color:#e6db74">    -- Here we use COUNT which will count all entries
+</span><span style="color:#e6db74">    -- and this is how you write SQL comments...
+</span><span style="color:#e6db74">    SELECT aphiaid AS AphiaID, date_year, COUNT(*) AS total_records
+</span><span style="color:#e6db74">    FROM read_parquet(&#39;{full_export}/*.parquet&#39;)
+</span><span style="color:#e6db74">    WHERE family = &#39;Acanthuridae&#39;
+</span><span style="color:#e6db74">    GROUP BY aphiaid, date_year
+</span><span style="color:#e6db74">    ORDER BY total_records DESC;
+</span><span style="color:#e6db74">    &#34;</span>
+))
+<span style="color:#a6e22e">toc</span>()
+</code></pre></div><pre><code>DuckDB query on full export: 1.263 sec elapsed
+</code></pre>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#75715e"># When we don&#39;t need the DuckDB connection anymore it is very important</span>
+<span style="color:#75715e"># to close it. After closing, if you need it again you should start from the</span>
+<span style="color:#75715e"># first step (dbConnect), and install the needed extensions.</span>
+<span style="color:#a6e22e">dbDisconnect</span>(con)
+</code></pre></div><p>Less than 2 seconds! That is really fast. Here is how the table looks like:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">head</span>(acanthuridae_by_year, <span style="color:#ae81ff">5</span>)
+</code></pre></div><pre><code>  AphiaID date_year total_records
+1  219659      2015          7872
+2  159581      2014          6816
+3  159581      2012          6239
+4  159581      2016          6120
+5  159578      2014          5875
+</code></pre>
+<p>Once you have it as an R object, you can then keep working with it. For example, we will get the three species with more records, do the cummulative sum of records and plot it.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">library</span>(ggplot2)
+
+total_by_taxon <span style="color:#f92672">&lt;-</span> acanthuridae_by_year <span style="color:#f92672">|&gt;</span>
+    <span style="color:#a6e22e">group_by</span>(AphiaID) <span style="color:#f92672">|&gt;</span>
+    <span style="color:#a6e22e">summarise</span>(records <span style="color:#f92672">=</span> <span style="color:#a6e22e">sum</span>(total_records)) <span style="color:#f92672">|&gt;</span>
+    <span style="color:#a6e22e">arrange</span>(<span style="color:#a6e22e">desc</span>(records))
+
+top_species <span style="color:#f92672">&lt;-</span> total_by_taxon<span style="color:#f92672">$</span>AphiaID[1<span style="color:#f92672">:</span><span style="color:#ae81ff">3</span>]
+
+top_by_year <span style="color:#f92672">&lt;-</span> acanthuridae_by_year <span style="color:#f92672">|&gt;</span>
+    <span style="color:#a6e22e">filter</span>(AphiaID <span style="color:#f92672">%in%</span> top_species) <span style="color:#f92672">|&gt;</span>
+    <span style="color:#a6e22e">filter</span>(<span style="color:#f92672">!</span><span style="color:#a6e22e">is.na</span>(date_year)) <span style="color:#f92672">|&gt;</span>
+    <span style="color:#a6e22e">arrange</span>(date_year) <span style="color:#f92672">|&gt;</span>
+    <span style="color:#a6e22e">group_by</span>(AphiaID) <span style="color:#f92672">|&gt;</span>
+    <span style="color:#a6e22e">mutate</span>(cumulative <span style="color:#f92672">=</span> <span style="color:#a6e22e">cumsum</span>(total_records)) <span style="color:#f92672">|&gt;</span>
+    <span style="color:#a6e22e">mutate</span>(AphiaID <span style="color:#f92672">=</span> <span style="color:#a6e22e">as.factor</span>(AphiaID))
+
+<span style="color:#a6e22e">ggplot</span>(top_by_year) <span style="color:#f92672">+</span>
+    <span style="color:#a6e22e">geom_line</span>(<span style="color:#a6e22e">aes</span>(x <span style="color:#f92672">=</span> date_year, y <span style="color:#f92672">=</span> cumulative, color <span style="color:#f92672">=</span> AphiaID)) <span style="color:#f92672">+</span>
+    <span style="color:#a6e22e">geom_point</span>(<span style="color:#a6e22e">aes</span>(x <span style="color:#f92672">=</span> date_year, y <span style="color:#f92672">=</span> cumulative, color <span style="color:#f92672">=</span> AphiaID), alpha <span style="color:#f92672">=</span> <span style="color:#ae81ff">.2</span>) <span style="color:#f92672">+</span>
+    <span style="color:#a6e22e">scale_color_manual</span>(values <span style="color:#f92672">=</span> <span style="color:#a6e22e">c</span>(<span style="color:#e6db74">&#34;#0c54c7ff&#34;</span>, <span style="color:#e6db74">&#34;#e4710cff&#34;</span>, <span style="color:#e6db74">&#34;#0cc785ff&#34;</span>)) <span style="color:#f92672">+</span>
+    <span style="color:#a6e22e">theme_light</span>() <span style="color:#f92672">+</span>
+    <span style="color:#a6e22e">ylab</span>(<span style="color:#e6db74">&#34;Records&#34;</span>) <span style="color:#f92672">+</span> <span style="color:#a6e22e">xlab</span>(<span style="color:#66d9ef">NULL</span>) <span style="color:#f92672">+</span> <span style="color:#a6e22e">ggtitle</span>(<span style="color:#e6db74">&#34;Acanthuridae&#34;</span>)
+</code></pre></div><p><img src="figure1.png" alt=""></p>
+<p>That is it, you already know the basics to work with DuckDB and improve your workflow when working with the Parquet exports from OBIS. On the next tutorial we will explore the spatial extension of DuckDB.</p>
+
+</div>
+
+  
+<footer class='entry-footer'>
+  <div class='container sep-before'><div class='categories'><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <path d="M22,19a2,2,0,0,1-2,2H4a2,2,0,0,1-2-2V5A2,2,0,0,1,4,3H9l2,3h9a2,2,0,0,1,2,2Z"/>
+  
+</svg>
+<span class='screen-reader-text'>Categories: </span><a class='category' href='/categories/tutorial/'>tutorial</a>, <a class='category' href='/categories/r/'>r</a>, <a class='category' href='/categories/data-manipulation/'>data-manipulation</a></div>
+<div class='tags'><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <path d="M20.59,13.41l-7.17,7.17a2,2,0,0,1-2.83,0L2,12V2H12l8.59,8.59A2,2,0,0,1,20.59,13.41Z"/>
+  <line x1="7" y1="7" x2="7" y2="7"/>
+  
+</svg>
+<span class='screen-reader-text'>Tags: </span><a class='tag' href='/tags/r/'>r</a>, <a class='tag' href='/tags/obis/'>obis</a>, <a class='tag' href='/tags/parquet/'>parquet</a>, <a class='tag' href='/tags/duckdb/'>duckdb</a></div>
+
+  </div>
+</footer>
+
+
+</article>
+
+<nav class='entry-nav'>
+  <div class='container'><div class='prev-entry sep-before'>
+      <a href='/tutorials/duckdb-part2/'>
+        <span aria-hidden='true'><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <line x1="20" y1="12" x2="4" y2="12"/>
+  <polyline points="10 18 4 12 10 6"/>
+  
+</svg>
+ Previous</span>
+        <span class='screen-reader-text'>Previous post: </span>Using DuckDB to query the OBIS full export - Part 2 (spatial extension)</a>
+    </div></div>
+</nav>
+
+
+
+
+      </main>
+
+      <footer id='footer' class='footer'>
+        <div class='container sep-before'><div class='copyright'>
+  <p> &copy; 2023-2025 Ocean Biodiversity Information System (OBIS) </p>
+</div>
+
+        </div>
+      </footer>
+
+    </div>
+  </div><script>window.__assets_js_src="/assets/js/"</script>
+
+<script src='/assets/js/main.c3bcf2df.js'></script><script src='/js/custom.js'></script>
+
+</body>
+
+</html>
+

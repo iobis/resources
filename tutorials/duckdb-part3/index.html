@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang='en' dir='auto'><head>
+  <meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'>
+<meta name='description' content='OBIS now has a full export in GeoParquet format, but to work with large datasets you need the right tools. Here we explore how you can use DuckDB to (very) fastly retrieve data from this resource.'>
+<meta name='theme-color' content='#0076b1'>
+
+<meta property='og:title' content='Using DuckDB to query the OBIS full export - Part 3 (`duckplyr` package) • Silas Principe'>
+<meta property='og:description' content='OBIS now has a full export in GeoParquet format, but to work with large datasets you need the right tools. Here we explore how you can use DuckDB to (very) fastly retrieve data from this resource.'>
+<meta property='og:url' content='http://www.example.com/tutorials/duckdb-part3/'>
+<meta property='og:site_name' content='resources'>
+<meta property='og:type' content='article'><meta property='og:image' content='https://www.gravatar.com/avatar/4c5a7ea9f5ed13b0617b0aa63f544caf?s=256'><meta property='article:section' content='tutorials'><meta property='article:tag' content='r'><meta property='article:tag' content='obis'><meta property='article:tag' content='parquet'><meta property='article:tag' content='duckdb'><meta property='article:tag' content='spatial'><meta property='article:published_time' content='2025-09-26T00:00:00Z'/><meta property='article:modified_time' content='2025-09-26T00:00:00Z'/><meta name='twitter:card' content='summary'><meta name='twitter:creator' content='@silasprincipe'>
+
+<meta name="generator" content="Hugo 0.88.1" />
+
+  <title>Using DuckDB to query the OBIS full export - Part 3 (`duckplyr` package) • Silas Principe</title>
+  <link rel='canonical' href='http://www.example.com/tutorials/duckdb-part3/'>
+  
+  
+  <link rel='icon' href='/favicon.ico'>
+<link rel='stylesheet' href='/assets/css/main.ab98e12b.css'><link rel='stylesheet' href='/css/custom.css'><style>
+:root{--color-accent:#0076b1;}
+</style>
+
+  
+
+</head>
+<body class='page type-tutorials has-sidebar'>
+
+  <div class='site'><div id='sidebar' class='sidebar'>
+  <a class='screen-reader-text' href='#main-menu'>Skip to Main Menu</a>
+
+  <div class='container'><section class='widget widget-about sep-after'>
+  <header>
+    
+    <div class='logo'>
+      <a href='/'>
+        <img src='/images/logo.png'>
+      </a>
+    </div>
+    
+    <h2 class='title site-title '>
+      <a href='/'>
+      resources
+      </a>
+    </h2>
+    <div class='desc'>
+    
+    </div>
+  </header>
+
+</section>
+<section class='widget widget-search sep-after'>
+  <header>
+    <h4 class='title widget-title'>Search</h4>
+  </header>
+
+  <form action='/search' id='search-form' class='search-form'>
+    <label>
+      <span class='screen-reader-text'>Search</span>
+      <input id='search-term' class='search-term' type='search' name='q' placeholder='Search&hellip;'>
+    </label></form>
+
+</section>
+<section class='widget widget-sidebar_menu sep-after'><nav id='sidebar-menu' class='menu sidebar-menu' aria-label='Sidebar Menu'>
+    <div class='container'>
+      <ul><li class='item'>
+  <a href='/'>Home</a></li><li class='item'>
+  <a href='/packages/'>Packages</a></li><li class='item has-current'>
+  <a href='/tutorials/'>Tutorials</a></li><li class='item'>
+  <a href='/find-your-dwc/'>Find your DwC</a></li><li class='item'>
+  <a href='https://manual.obis.org/'>OBIS Manual &#8599;</a></li><li class='item'>
+  <a href='https://github.com/iobis/resources'>Repo &#8599;</a></li></ul>
+    </div>
+  </nav>
+
+</section><section class='widget widget-taxonomy_cloud sep-after'>
+  <header>
+    <h4 class='title widget-title'>Tags</h4>
+  </header>
+
+  <div class='container list-container'>
+  <ul class='list taxonomy-cloud'><li>
+        <a href='/tags/duckdb/' style='font-size:1.3333333333333333em'>duckdb</a>
+      </li><li>
+        <a href='/tags/obis/' style='font-size:1.6666666666666665em'>obis</a>
+      </li><li>
+        <a href='/tags/parquet/' style='font-size:1.6666666666666665em'>parquet</a>
+      </li><li>
+        <a href='/tags/r/' style='font-size:2em'>r</a>
+      </li><li>
+        <a href='/tags/spatial/' style='font-size:1em'>spatial</a>
+      </li></ul>
+</div>
+
+
+</section>
+<section class='widget widget-social_menu sep-after'><nav aria-label='Social Menu'>
+    <ul><li>
+        <a href='https://github.com/MunifTanjim' target='_blank' rel='noopener'>
+          <span class='screen-reader-text'>Open Github account in new tab</span><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+  
+</svg>
+</a>
+      </li><li>
+        <a href='https://twitter.com/MunifTanjim' target='_blank' rel='noopener'>
+          <span class='screen-reader-text'>Open Twitter account in new tab</span><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/>
+  
+</svg>
+</a>
+      </li><li>
+        <a href='mailto:contact@example.com' target='_blank' rel='noopener'>
+          <span class='screen-reader-text'>Contact via Email</span><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+  <polyline points="22,6 12,13 2,6"/>
+  
+</svg>
+</a>
+      </li><li>
+        <a href='https://linkedin.com/in/muniftanjim' target='_blank' rel='noopener'>
+          <span class='screen-reader-text'>Open Linkedin account in new tab</span><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
+  <rect x="2" y="9" width="4" height="12"/>
+  <circle cx="4" cy="4" r="2"/>
+  
+</svg>
+</a>
+      </li></ul>
+  </nav>
+</section></div>
+
+  <div class='sidebar-overlay'></div>
+</div><div class='main'><a class='screen-reader-text' href='#content'>Skip to Content</a>
+
+<button id='sidebar-toggler' class='sidebar-toggler' aria-controls='sidebar'>
+  <span class='screen-reader-text'>Toggle Sidebar</span>
+  <span class='open'><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <line x1="3" y1="12" x2="21" y2="12" />
+  <line x1="3" y1="6" x2="21" y2="6" />
+  <line x1="3" y1="18" x2="21" y2="18" />
+  
+</svg>
+</span>
+  <span class='close'><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <line x1="18" y1="6" x2="6" y2="18" />
+  <line x1="6" y1="6" x2="18" y2="18" />
+  
+</svg>
+</span>
+</button><div class='header-widgets'>
+        <div class='container'></div>
+      </div><header id='header' class='header site-header'>
+        <div class='container sep-after'>
+          <div class='header-info'>
+              <p class='site-title title'>resources</p>
+            <p class='desc site-desc'></p>
+          </div>
+        </div>
+      </header><main id='content'>
+
+
+<article lang='en' class='entry'>
+  <header class='header entry-header'>
+  <div class='container sep-after'>
+    <div class='header-info'>
+      <h1 class='title'>Using DuckDB to query the OBIS full export - Part 3 (`duckplyr` package)</h1>
+      
+<p class='desc'>OBIS now has a full export in GeoParquet format, but to work with large datasets you need the right tools. Here we explore how you can use DuckDB to (very) fastly retrieve data from this resource.</p>
+
+
+    </div>
+    <div class='entry-meta'>
+  <span class='posted-on'><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+  <line x1="16" y1="2" x2="16" y2="6"/>
+  <line x1="8" y1="2" x2="8" y2="6"/>
+  <line x1="3" y1="10" x2="21" y2="10"/>
+  
+</svg>
+<span class='screen-reader-text'>Posted on </span>
+  <time class='entry-date' datetime='2025-09-26T00:00:00Z'>2025, Sep 26</time>
+</span>
+
+  <span class='byline'><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <path d="M21,21V20c0-2.76-4-5-9-5s-9,2.24-9,5v1"/>
+  <path d="M16,6.37A4,4,0,1,1,12.63,3,4,4,0,0,1,16,6.37Z"/>
+  
+</svg>
+<span class='screen-reader-text'> by </span><a href='/authors/silasprincipe'>Silas Principe</a></span>
+  
+<span class='reading-time'><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <circle cx="12" cy="12" r="10"/>
+  <polyline points="12 6 12 12 15 15"/>
+  
+</svg>
+6 mins read
+</span>
+
+
+</div>
+
+
+  </div>
+</header>
+
+  
+  
+
+  <div class='container entry-content'>
+  <h1 id="duckplyr"><code>duckplyr</code></h1>
+<p>In the two previous tutorials we learned about how to use <a href="http://www.example.com/tutorials/duckdb-part1/">DuckDB for querying the Parquet exports</a> and about <a href="http://www.example.com/tutorials/duckdb-part2/">the DuckDB spatial extension</a>. Here we will explore the R package <a href="https://duckplyr.tidyverse.org/index.html"><code>duckplyr</code></a>, a drop-in replacement for DuckDB on R which uses the <code>tidyverse</code> grammar.</p>
+<p>Again, we will work with a local copy of the full export, which you can download from here: <a href="https://obis.org/data/access/">https://obis.org/data/access/</a>. You can also explore together through the Jupyter Notebook (<a href="https://github.com/iobis/resources/blob/main/content/tutorials/duckdb-part3/duckdb-part3.ipynb">download it locally</a> or open it through <strong>Google Colab</strong> by <a href="https://colab.research.google.com/github/iobis/resources/blob/main/content/tutorials/duckdb-part3/duckdb-part3.ipynb">clicking here</a>).</p>
+<p>We will work with the European sea-bass <a href="https://obis.org/taxon/126975"><em>Dicentrarchus labrax</em></a>. Let&rsquo;s start by simpling get all records for it.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">suppressPackageStartupMessages</span>(<span style="color:#a6e22e">library</span>(duckplyr)) <span style="color:#75715e"># For queries</span>
+<span style="color:#a6e22e">suppressPackageStartupMessages</span>(<span style="color:#a6e22e">library</span>(tictoc)) <span style="color:#75715e"># To get timings</span>
+<span style="color:#a6e22e">suppressPackageStartupMessages</span>(<span style="color:#a6e22e">library</span>(sf)) <span style="color:#75715e"># To later work with the spatial results</span>
+<span style="color:#a6e22e">suppressPackageStartupMessages</span>(<span style="color:#a6e22e">library</span>(ggplot2)) <span style="color:#75715e"># For plotting</span>
+
+<span style="color:#75715e"># Put here the path to your downloaded full export</span>
+<span style="color:#75715e"># In this case we need to add *.parquet</span>
+fe_path <span style="color:#f92672">&lt;-</span> <span style="color:#e6db74">&#34;/Volumes/OBIS2/obis_20250318_parquet/occurrence/*.parquet&#34;</span>
+
+full_export <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">read_parquet_duckdb</span>(fe_path)
+
+<span style="color:#a6e22e">head</span>(full_export)
+</code></pre></div><pre><code># A duckplyr data frame: 283 variables
+  dataset_id    id    acceptedNameUsage acceptedNameUsageID accessRights aphiaid
+  &lt;chr&gt;         &lt;chr&gt; &lt;chr&gt;             &lt;chr&gt;               &lt;chr&gt;          &lt;dbl&gt;
+1 00017595-e01… e3aa… &lt;NA&gt;              &lt;NA&gt;                http://crea…  126436
+2 00017595-e01… c0c1… &lt;NA&gt;              &lt;NA&gt;                http://crea…  126436
+3 00017595-e01… 0122… &lt;NA&gt;              &lt;NA&gt;                http://crea…  126436
+4 00017595-e01… 57bd… &lt;NA&gt;              &lt;NA&gt;                http://crea…  126436
+5 00017595-e01… 98ab… &lt;NA&gt;              &lt;NA&gt;                http://crea…  126436
+6 00017595-e01… b142… &lt;NA&gt;              &lt;NA&gt;                http://crea…  126436
+# ℹ 277 more variables: areas &lt;list&gt;, associatedMedia &lt;chr&gt;,
+#   associatedOccurrences &lt;chr&gt;, associatedOrganisms &lt;chr&gt;,
+#   associatedReferences &lt;chr&gt;, associatedSequences &lt;chr&gt;,
+#   associatedTaxa &lt;chr&gt;, basisOfRecord &lt;chr&gt;, bathymetry &lt;dbl&gt;, bed &lt;chr&gt;,
+#   behavior &lt;chr&gt;, bibliographicCitation &lt;chr&gt;, brackish &lt;lgl&gt;, caste &lt;chr&gt;,
+#   catalogNumber &lt;chr&gt;, class &lt;chr&gt;, classid &lt;dbl&gt;, collectionCode &lt;chr&gt;,
+#   collectionID &lt;chr&gt;, continent &lt;chr&gt;, coordinatePrecision &lt;chr&gt;, …
+</code></pre>
+<p>Note that differently from our previous tutorials, in this case <code>duckplyr</code> provides you with an overview (a sample) of the dataset once you open it. So far, we have not done any query. Let&rsquo;s proceed.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">species_id <span style="color:#f92672">&lt;-</span> <span style="color:#ae81ff">126975</span>
+
+seabass_rec <span style="color:#f92672">&lt;-</span> full_export <span style="color:#f92672">|&gt;</span>
+    <span style="color:#a6e22e">select</span>(aphiaid, occurrenceID) <span style="color:#f92672">|&gt;</span>
+    <span style="color:#a6e22e">filter</span>(aphiaid <span style="color:#f92672">==</span> species_id) <span style="color:#f92672">|&gt;</span>
+    <span style="color:#a6e22e">collect</span>()
+
+<span style="color:#a6e22e">head</span>(seabass_rec)
+</code></pre></div><pre><code># A tibble: 6 × 2
+  aphiaid occurrenceID       
+    &lt;dbl&gt; &lt;chr&gt;              
+1  126975 Trieste_1902_126975
+2  126975 Trieste_1903_126975
+3  126975 Trieste_1904_126975
+4  126975 Trieste_1905_126975
+5  126975 Trieste_1906_126975
+6  126975 Trieste_1907_126975
+</code></pre>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">nrow</span>(seabass_rec)
+</code></pre></div><pre><code>[1] 14631
+</code></pre>
+<p>We quickly got all records for the species. Under the hood, <code>duckplyr</code> is doing a SQL call just as we did on previous tutorials. You can check the query in two ways - using <code>explain()</code> or <code>show_query()</code></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">full_export <span style="color:#f92672">|&gt;</span>
+    <span style="color:#a6e22e">select</span>(aphiaid, occurrenceID) <span style="color:#f92672">|&gt;</span>
+    <span style="color:#a6e22e">filter</span>(aphiaid <span style="color:#f92672">==</span> species_id) <span style="color:#f92672">|&gt;</span>
+    <span style="color:#a6e22e">explain</span>()
+</code></pre></div><pre><code>┌───────────────────────────┐
+│       READ_PARQUET        │
+│    ────────────────────   │
+│         Function:         │
+│        READ_PARQUET       │
+│                           │
+│        Projections:       │
+│          aphiaid          │
+│        occurrenceID       │
+│                           │
+│          Filters:         │
+│ &quot;r_base::==&quot;(CAST(aphiaid │
+│    AS DOUBLE), 126975.0)  │
+│                           │
+│        ~277012 Rows       │
+└───────────────────────────┘
+</code></pre>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">full_export <span style="color:#f92672">|&gt;</span>
+    <span style="color:#75715e"># To use show_query, we first need to convert to tbl, the format used</span>
+    <span style="color:#75715e"># by the package dbplyr</span>
+    <span style="color:#a6e22e">as_tbl</span>() <span style="color:#f92672">|&gt;</span>
+    <span style="color:#a6e22e">select</span>(aphiaid, occurrenceID) <span style="color:#f92672">|&gt;</span>
+    <span style="color:#a6e22e">filter</span>(aphiaid <span style="color:#f92672">==</span> species_id) <span style="color:#f92672">|&gt;</span>
+    <span style="color:#a6e22e">show_query</span>()
+</code></pre></div><pre><code>&lt;SQL&gt;
+SELECT aphiaid, occurrenceID
+FROM as_tbl_duckplyr_CvATbPmIAU
+WHERE (aphiaid = 126975.0)
+</code></pre>
+<p>By checking the queries you might notice that <em>sometimes</em> the queries are overly complex. But even with that, the package make it easier to do the queries, since it uses a grammar that is well know by R users.</p>
+<p>Now, we will do a more complex query. Aggregate by year, and get the number of records.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">seabass_rec_year <span style="color:#f92672">&lt;-</span> full_export <span style="color:#f92672">|&gt;</span>
+    <span style="color:#a6e22e">select</span>(aphiaid, occurrenceID, date_year, sst) <span style="color:#f92672">|&gt;</span>
+    <span style="color:#a6e22e">filter</span>(aphiaid <span style="color:#f92672">==</span> species_id) <span style="color:#f92672">|&gt;</span>
+    <span style="color:#a6e22e">filter</span>(<span style="color:#f92672">!</span><span style="color:#a6e22e">is.na</span>(date_year)) <span style="color:#f92672">|&gt;</span>
+    <span style="color:#a6e22e">group_by</span>(date_year) <span style="color:#f92672">|&gt;</span>
+    <span style="color:#a6e22e">summarise</span>(
+        records <span style="color:#f92672">=</span> <span style="color:#a6e22e">n</span>()
+    ) <span style="color:#f92672">|&gt;</span>
+    <span style="color:#a6e22e">collect</span>()
+
+<span style="color:#a6e22e">tail</span>(seabass_rec_year, <span style="color:#ae81ff">3</span>)
+</code></pre></div><pre><code># A tibble: 3 × 2
+  date_year records
+      &lt;dbl&gt;   &lt;int&gt;
+1      2021     632
+2      2022     221
+3      2023     213
+</code></pre>
+<p>Now, and about the extensions? You can use them as usual! For example, to install the <code>httpfs</code> extension to work with online data you simply use <code>db_exec(&quot;INSTALL httpfs; LOAD httpfs;&quot;)</code>. Now we will try to use the spatial extension, that we saw on the last tutorial:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#75715e"># Install the extension</span>
+<span style="color:#a6e22e">db_exec</span>(<span style="color:#e6db74">&#34;INSTALL spatial; LOAD spatial;&#34;</span>)
+
+sel_area <span style="color:#f92672">&lt;-</span> <span style="color:#e6db74">&#34;POLYGON ((-14.414063 43.325178, 9.140625 43.325178, 9.140625 60.06484, -14.414063 60.06484, -14.414063 43.325178))&#34;</span>
+</code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">seabass_rec_geom <span style="color:#f92672">&lt;-</span> full_export <span style="color:#f92672">|&gt;</span>
+    <span style="color:#a6e22e">select</span>(aphiaid, occurrenceID, date_year, sst, geometry) <span style="color:#f92672">|&gt;</span>
+    <span style="color:#a6e22e">filter</span>(aphiaid <span style="color:#f92672">==</span> species_id) <span style="color:#f92672">|&gt;</span>
+    <span style="color:#a6e22e">filter</span>(<span style="color:#f92672">!</span><span style="color:#a6e22e">is.na</span>(date_year)) <span style="color:#f92672">|&gt;</span>
+    <span style="color:#a6e22e">filter</span>(<span style="color:#a6e22e">ST_Intersects</span>(geometry, <span style="color:#a6e22e">ST_GeomFromText</span>(sel_area))) <span style="color:#f92672">|&gt;</span>
+    <span style="color:#a6e22e">collect</span>()
+</code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#75715e"># Error in `filter()`: </span>
+<span style="color:#75715e"># ℹ In argument: `ST_Intersects(geometry, ST_GeomFromText(sel_area))`.</span>
+<span style="color:#75715e"># Caused by error in `ST_Intersects()`:</span>
+<span style="color:#75715e"># ! could not find function &#34;ST_Intersects&#34;</span>
+<span style="color:#75715e"># Run `rlang::last_trace()` to see where the error occurred.</span>
+</code></pre></div><p>As you see it fails. That is because <code>ST_Intersects</code> is not an R function, but a DuckDB extension function. How can we deal with that? We have to use the <code>dbplyr</code> capabilities instead. If you convert to a <code>tbl</code> object, you can then pass arbitrary functions to it. If it is not found in R, it will assume it is a DuckDB function.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">seabass_rec_geom <span style="color:#f92672">&lt;-</span> full_export <span style="color:#f92672">|&gt;</span>
+    <span style="color:#75715e"># convert to tbl, the format used by the package dbplyr</span>
+    <span style="color:#a6e22e">as_tbl</span>() <span style="color:#f92672">|&gt;</span>
+    <span style="color:#75715e"># Do the queries</span>
+    <span style="color:#a6e22e">select</span>(aphiaid, occurrenceID, date_year, sst, geometry) <span style="color:#f92672">|&gt;</span>
+    <span style="color:#a6e22e">filter</span>(aphiaid <span style="color:#f92672">==</span> species_id) <span style="color:#f92672">|&gt;</span>
+    <span style="color:#a6e22e">filter</span>(<span style="color:#f92672">!</span><span style="color:#a6e22e">is.na</span>(date_year)) <span style="color:#f92672">|&gt;</span>
+    <span style="color:#75715e"># It will assume it is a DuckDB function</span>
+    <span style="color:#a6e22e">filter</span>(<span style="color:#a6e22e">ST_Intersects</span>(geometry, <span style="color:#a6e22e">ST_GeomFromText</span>(sel_area))) <span style="color:#f92672">|&gt;</span>
+    <span style="color:#75715e">#show_query() # If you want to check the query</span>
+    <span style="color:#a6e22e">as_duckdb_tibble</span>() <span style="color:#f92672">|&gt;</span> <span style="color:#75715e"># Go back to duckplyr, in this case not necessary as</span>
+                          <span style="color:#75715e"># we are not doing further queries</span>
+    <span style="color:#a6e22e">collect</span>() <span style="color:#75715e"># Materialize call</span>
+
+<span style="color:#a6e22e">head</span>(seabass_rec_geom, <span style="color:#ae81ff">3</span>)
+</code></pre></div><pre><code># A tibble: 3 × 5
+  aphiaid occurrenceID                        date_year   sst geometry  
+    &lt;dbl&gt; &lt;chr&gt;                                   &lt;dbl&gt; &lt;dbl&gt; &lt;list&gt;    
+1  126975 IMR2017314-20801-126975                  2017  10.4 &lt;raw [32]&gt;
+2  126975 IMR9536-20181-56015-126975               2018  NA   &lt;raw [32]&gt;
+3  126975 ft115bis_bottom_5:MiFish_UE-asv0687      2022  12.5 &lt;raw [32]&gt;
+</code></pre>
+<p>One other nice extension is the H3 extension, which introduces the <a href="https://duckdb.org/community_extensions/extensions/h3.html">H3 grid system</a> to DuckDB. Let&rsquo;s try it. We will do the same query as above, but now also get the H3 cells from it at the resolution 4, and plot the average SST and number of records in each heaxagon.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">db_exec</span>(<span style="color:#e6db74">&#34;INSTALL h3 FROM community; LOAD h3;&#34;</span>)
+
+seabass_rec_h3 <span style="color:#f92672">&lt;-</span> full_export <span style="color:#f92672">|&gt;</span>
+    <span style="color:#75715e"># convert to tbl, the format used by the package dbplyr</span>
+    <span style="color:#a6e22e">as_tbl</span>() <span style="color:#f92672">|&gt;</span>
+    <span style="color:#75715e"># Do the queries</span>
+    <span style="color:#a6e22e">select</span>(aphiaid, occurrenceID, date_year, sst, geometry, decimalLongitude, decimalLatitude) <span style="color:#f92672">|&gt;</span>
+    <span style="color:#a6e22e">filter</span>(aphiaid <span style="color:#f92672">==</span> species_id) <span style="color:#f92672">|&gt;</span>
+    <span style="color:#a6e22e">filter</span>(<span style="color:#f92672">!</span><span style="color:#a6e22e">is.na</span>(date_year)) <span style="color:#f92672">|&gt;</span>
+    <span style="color:#75715e"># It will assume it is a DuckDB function</span>
+    <span style="color:#a6e22e">filter</span>(<span style="color:#a6e22e">ST_Intersects</span>(geometry, <span style="color:#a6e22e">ST_GeomFromText</span>(sel_area))) <span style="color:#f92672">|&gt;</span>
+    <span style="color:#75715e"># Note that the resolution should be passed as an integer, that is why we add the L to 4</span>
+    <span style="color:#a6e22e">mutate</span>(h3_cell <span style="color:#f92672">=</span> <span style="color:#a6e22e">h3_latlng_to_cell_string</span>(decimalLatitude, decimalLongitude, <span style="color:#ae81ff">4L</span>)) <span style="color:#f92672">|&gt;</span>
+    <span style="color:#a6e22e">mutate</span>(h3_pol <span style="color:#f92672">=</span> <span style="color:#a6e22e">h3_cell_to_boundary_wkt</span>(h3_cell)) <span style="color:#f92672">|&gt;</span>
+    <span style="color:#75715e">#show_query() # If you want to check the query</span>
+    <span style="color:#a6e22e">as_duckdb_tibble</span>() <span style="color:#f92672">|&gt;</span> <span style="color:#75715e"># Go back to duckplyr</span>
+    <span style="color:#a6e22e">group_by</span>(h3_cell, h3_pol) <span style="color:#f92672">|&gt;</span>
+    <span style="color:#a6e22e">summarise</span>(
+        records <span style="color:#f92672">=</span> <span style="color:#a6e22e">n</span>(),
+        average_sst <span style="color:#f92672">=</span> <span style="color:#a6e22e">mean</span>(sst, na.rm <span style="color:#f92672">=</span> T)
+    ) <span style="color:#f92672">|&gt;</span>
+    <span style="color:#a6e22e">collect</span>() <span style="color:#75715e"># Materialize call</span>
+
+<span style="color:#a6e22e">head</span>(seabass_rec_h3, <span style="color:#ae81ff">3</span>)
+</code></pre></div><pre><code># A tibble: 3 × 4
+# Groups:   h3_cell [3]
+  h3_cell         h3_pol                                     records average_sst
+  &lt;chr&gt;           &lt;chr&gt;                                        &lt;int&gt;       &lt;dbl&gt;
+1 840983dffffffff POLYGON ((6.234412 59.515652, 5.864064 59…       1       NaN  
+2 8409933ffffffff POLYGON ((8.124682 57.683255, 8.027435 57…       1        10.6
+3 84099e9ffffffff POLYGON ((7.739213 58.299457, 7.642413 58…       1        10.4
+</code></pre>
+<p>We can now plot it:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">seabass_rec_h3_sf <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">st_as_sf</span>(
+    seabass_rec_h3, wkt <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;h3_pol&#34;</span>, crs <span style="color:#f92672">=</span> <span style="color:#ae81ff">4326</span>
+)
+
+<span style="color:#a6e22e">sf_use_s2</span>(<span style="color:#66d9ef">FALSE</span>)
+wrld <span style="color:#f92672">&lt;-</span> rnaturalearth<span style="color:#f92672">::</span><span style="color:#a6e22e">ne_countries</span>(returnclass <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;sf&#34;</span>)
+wrld <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">st_crop</span>(wrld, seabass_rec_h3_sf)
+
+<span style="color:#a6e22e">ggplot</span>() <span style="color:#f92672">+</span>
+    <span style="color:#a6e22e">geom_sf</span>(data <span style="color:#f92672">=</span> wrld, fill <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;grey90&#34;</span>) <span style="color:#f92672">+</span>
+    <span style="color:#a6e22e">geom_sf</span>(data <span style="color:#f92672">=</span> seabass_rec_h3_sf, <span style="color:#a6e22e">aes</span>(fill <span style="color:#f92672">=</span> records)) <span style="color:#f92672">+</span>
+    <span style="color:#a6e22e">scale_fill_viridis_c</span>(transform <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;log10&#34;</span>) <span style="color:#f92672">+</span>
+    <span style="color:#a6e22e">theme_light</span>() <span style="color:#f92672">+</span>
+    <span style="color:#a6e22e">ggtitle</span>(<span style="color:#e6db74">&#34;Number of records for the European sea-bass&#34;</span>)
+</code></pre></div><p><!-- raw HTML omitted --></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">ggplot</span>() <span style="color:#f92672">+</span>
+    <span style="color:#a6e22e">geom_sf</span>(data <span style="color:#f92672">=</span> wrld, fill <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;grey90&#34;</span>) <span style="color:#f92672">+</span>
+    <span style="color:#a6e22e">geom_sf</span>(data <span style="color:#f92672">=</span> seabass_rec_h3_sf, <span style="color:#a6e22e">aes</span>(fill <span style="color:#f92672">=</span> average_sst)) <span style="color:#f92672">+</span>
+    <span style="color:#a6e22e">scale_fill_viridis_c</span>(transform <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;log10&#34;</span>) <span style="color:#f92672">+</span>
+    <span style="color:#a6e22e">theme_light</span>() <span style="color:#f92672">+</span>
+    <span style="color:#a6e22e">ggtitle</span>(<span style="color:#e6db74">&#34;Average SST&#34;</span>)
+</code></pre></div><p><!-- raw HTML omitted --></p>
+<p><img src="image1.png" alt=""></p>
+<p><img src="image2.png" alt=""></p>
+<p>And that concludes our series about the use of DuckDB for querying the OBIS Parquet exports. We hope this will give you more tools to work with OBIS data.</p>
+
+</div>
+
+  
+<footer class='entry-footer'>
+  <div class='container sep-before'><div class='categories'><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <path d="M22,19a2,2,0,0,1-2,2H4a2,2,0,0,1-2-2V5A2,2,0,0,1,4,3H9l2,3h9a2,2,0,0,1,2,2Z"/>
+  
+</svg>
+<span class='screen-reader-text'>Categories: </span><a class='category' href='/categories/tutorial/'>tutorial</a>, <a class='category' href='/categories/r/'>r</a>, <a class='category' href='/categories/data-manipulation/'>data-manipulation</a></div>
+<div class='tags'><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <path d="M20.59,13.41l-7.17,7.17a2,2,0,0,1-2.83,0L2,12V2H12l8.59,8.59A2,2,0,0,1,20.59,13.41Z"/>
+  <line x1="7" y1="7" x2="7" y2="7"/>
+  
+</svg>
+<span class='screen-reader-text'>Tags: </span><a class='tag' href='/tags/r/'>r</a>, <a class='tag' href='/tags/obis/'>obis</a>, <a class='tag' href='/tags/parquet/'>parquet</a>, <a class='tag' href='/tags/duckdb/'>duckdb</a>, <a class='tag' href='/tags/spatial/'>spatial</a></div>
+
+  </div>
+</footer>
+
+
+</article>
+
+<nav class='entry-nav'>
+  <div class='container'><div class='prev-entry sep-before'>
+      <a href='/tutorials/env-data/'>
+        <span aria-hidden='true'><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <line x1="20" y1="12" x2="4" y2="12"/>
+  <polyline points="10 18 4 12 10 6"/>
+  
+</svg>
+ Previous</span>
+        <span class='screen-reader-text'>Previous post: </span>Matching environmental information with OBIS occurrences</a>
+    </div><div class='next-entry sep-before'>
+      <a href='/tutorials/duckdb-part2/'>
+        <span class='screen-reader-text'>Next post: </span>Using DuckDB to query the OBIS full export - Part 2 (spatial extension)<span aria-hidden='true'>Next <svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <line x1="4" y1="12" x2="20" y2="12"/>
+  <polyline points="14 6 20 12 14 18"/>
+  
+</svg>
+</span>
+      </a>
+    </div></div>
+</nav>
+
+
+
+
+      </main>
+
+      <footer id='footer' class='footer'>
+        <div class='container sep-before'><div class='copyright'>
+  <p> &copy; 2023-2025 Ocean Biodiversity Information System (OBIS) </p>
+</div>
+
+        </div>
+      </footer>
+
+    </div>
+  </div><script>window.__assets_js_src="/assets/js/"</script>
+
+<script src='/assets/js/main.c3bcf2df.js'></script><script src='/js/custom.js'></script>
+
+</body>
+
+</html>
+
