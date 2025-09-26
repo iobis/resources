@@ -60,3 +60,5 @@ themes/minimo
 content/**/*.html
 !content/find-your-dwc/*
 
+
+/.quarto/
