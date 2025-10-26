@@ -7,22 +7,22 @@
     <generator>Hugo -- gohugo.io</generator>
     <lastBuildDate>Fri, 26 Sep 2025 00:00:00 +0000</lastBuildDate><atom:link href="http://www.example.com/tags/spatial/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>Using DuckDB to query the OBIS full export - Part 2 (spatial extension)</title>
+      <title>Using DuckDB to query the OBIS occurrence dataset - Part 2 (spatial extension)</title>
       <link>http://www.example.com/tutorials/duckdb-part2/</link>
       <pubDate>Fri, 26 Sep 2025 00:00:00 +0000</pubDate>
       
       <guid>http://www.example.com/tutorials/duckdb-part2/</guid>
-      <description>Spatial extension of DuckDB In a previous tutorial we learned about DuckDB and how it can be used to query Parquet datasets from OBIS. As we shared, the new full export is a GeoParquet dataset, meaning that it add spatial functionalities to the standard Parquet format. DuckDB has a powerful spatial extension, which we will present in this tutorial. Of course, we will just give you a glimpse of what you can do with this extension, and you should invest a few minutes to explore the full documentation.</description>
+      <description>Spatial extension of DuckDB In a previous tutorial we learned about DuckDB and how it can be used to query Parquet datasets from OBIS. As we shared, the new occurrence dataset is a GeoParquet dataset, meaning that it add spatial functionalities to the standard Parquet format. DuckDB has a powerful spatial extension, which we will present in this tutorial. Of course, we will just give you a glimpse of what you can do with this extension, and you should invest a few minutes to explore the full documentation.</description>
     </item>
     
     <item>
-      <title>Using DuckDB to query the OBIS full export - Part 3 (`duckplyr` package)</title>
+      <title>Using DuckDB to query the OBIS occurrence dataset - Part 3 (`duckplyr` package)</title>
       <link>http://www.example.com/tutorials/duckdb-part3/</link>
       <pubDate>Fri, 26 Sep 2025 00:00:00 +0000</pubDate>
       
       <guid>http://www.example.com/tutorials/duckdb-part3/</guid>
       <description>duckplyr In the two previous tutorials we learned about how to use DuckDB for querying the Parquet exports and about the DuckDB spatial extension. Here we will explore the R package duckplyr, a drop-in replacement for DuckDB on R which uses the tidyverse grammar.
-Again, we will work with a local copy of the full export, which you can download from here: https://obis.org/data/access/. You can also explore together through the Jupyter Notebook (download it locally or open it through Google Colab by clicking here).</description>
+Again, we will work with a local copy of the occurrence dataset, which you can download here: https://obis.org/data/access/. You can also explore together through the Jupyter Notebook (download it locally or open it through Google Colab by clicking here).</description>
     </item>
     
   </channel>

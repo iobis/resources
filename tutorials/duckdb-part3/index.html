@@ -2,18 +2,18 @@
 <html lang='en' dir='auto'><head>
   <meta charset='utf-8'>
 <meta name='viewport' content='width=device-width, initial-scale=1'>
-<meta name='description' content='OBIS now has a full export in GeoParquet format, but to work with large datasets you need the right tools. Here we explore how you can use DuckDB to (very) fastly retrieve data from this resource.'>
+<meta name='description' content='OBIS now has a occurrence dataset in GeoParquet format, but to work with large datasets you need the right tools. Here we explore how you can use DuckDB to (very) quickly retrieve data from this resource.'>
 <meta name='theme-color' content='#0076b1'>
 
-<meta property='og:title' content='Using DuckDB to query the OBIS full export - Part 3 (`duckplyr` package) • Silas Principe'>
-<meta property='og:description' content='OBIS now has a full export in GeoParquet format, but to work with large datasets you need the right tools. Here we explore how you can use DuckDB to (very) fastly retrieve data from this resource.'>
+<meta property='og:title' content='Using DuckDB to query the OBIS occurrence dataset - Part 3 (`duckplyr` package) • Silas Principe'>
+<meta property='og:description' content='OBIS now has a occurrence dataset in GeoParquet format, but to work with large datasets you need the right tools. Here we explore how you can use DuckDB to (very) quickly retrieve data from this resource.'>
 <meta property='og:url' content='http://www.example.com/tutorials/duckdb-part3/'>
 <meta property='og:site_name' content='resources'>
 <meta property='og:type' content='article'><meta property='og:image' content='https://www.gravatar.com/avatar/4c5a7ea9f5ed13b0617b0aa63f544caf?s=256'><meta property='article:section' content='tutorials'><meta property='article:tag' content='r'><meta property='article:tag' content='obis'><meta property='article:tag' content='parquet'><meta property='article:tag' content='duckdb'><meta property='article:tag' content='spatial'><meta property='article:published_time' content='2025-09-26T00:00:00Z'/><meta property='article:modified_time' content='2025-09-26T00:00:00Z'/><meta name='twitter:card' content='summary'><meta name='twitter:creator' content='@silasprincipe'>
 
 <meta name="generator" content="Hugo 0.88.1" />
 
-  <title>Using DuckDB to query the OBIS full export - Part 3 (`duckplyr` package) • Silas Principe</title>
+  <title>Using DuckDB to query the OBIS occurrence dataset - Part 3 (`duckplyr` package) • Silas Principe</title>
   <link rel='canonical' href='http://www.example.com/tutorials/duckdb-part3/'>
   
   
@@ -171,9 +171,9 @@
   <header class='header entry-header'>
   <div class='container sep-after'>
     <div class='header-info'>
-      <h1 class='title'>Using DuckDB to query the OBIS full export - Part 3 (`duckplyr` package)</h1>
+      <h1 class='title'>Using DuckDB to query the OBIS occurrence dataset - Part 3 (`duckplyr` package)</h1>
       
-<p class='desc'>OBIS now has a full export in GeoParquet format, but to work with large datasets you need the right tools. Here we explore how you can use DuckDB to (very) fastly retrieve data from this resource.</p>
+<p class='desc'>OBIS now has a occurrence dataset in GeoParquet format, but to work with large datasets you need the right tools. Here we explore how you can use DuckDB to (very) quickly retrieve data from this resource.</p>
 
 
     </div>
@@ -220,14 +220,14 @@
   <div class='container entry-content'>
   <h1 id="duckplyr"><code>duckplyr</code></h1>
 <p>In the two previous tutorials we learned about how to use <a href="http://www.example.com/tutorials/duckdb-part1/">DuckDB for querying the Parquet exports</a> and about <a href="http://www.example.com/tutorials/duckdb-part2/">the DuckDB spatial extension</a>. Here we will explore the R package <a href="https://duckplyr.tidyverse.org/index.html"><code>duckplyr</code></a>, a drop-in replacement for DuckDB on R which uses the <code>tidyverse</code> grammar.</p>
-<p>Again, we will work with a local copy of the full export, which you can download from here: <a href="https://obis.org/data/access/">https://obis.org/data/access/</a>. You can also explore together through the Jupyter Notebook (<a href="https://github.com/iobis/resources/blob/main/content/tutorials/duckdb-part3/duckdb-part3.ipynb">download it locally</a> or open it through <strong>Google Colab</strong> by <a href="https://colab.research.google.com/github/iobis/resources/blob/main/content/tutorials/duckdb-part3/duckdb-part3.ipynb">clicking here</a>).</p>
-<p>We will work with the European sea-bass <a href="https://obis.org/taxon/126975"><em>Dicentrarchus labrax</em></a>. Let&rsquo;s start by simpling get all records for it.</p>
+<p>Again, we will work with a local copy of the occurrence dataset, which you can download here: <a href="https://obis.org/data/access/">https://obis.org/data/access/</a>. You can also explore together through the Jupyter Notebook (<a href="https://github.com/iobis/resources/blob/main/content/tutorials/duckdb-part3/duckdb-part3.ipynb">download it locally</a> or open it through <strong>Google Colab</strong> by <a href="https://colab.research.google.com/github/iobis/resources/blob/main/content/tutorials/duckdb-part3/duckdb-part3.ipynb">clicking here</a>).</p>
+<p>We will work with the European sea-bass <a href="https://obis.org/taxon/126975"><em>Dicentrarchus labrax</em></a>. Let&rsquo;s start by simply getting all records for it.</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">suppressPackageStartupMessages</span>(<span style="color:#a6e22e">library</span>(duckplyr)) <span style="color:#75715e"># For queries</span>
 <span style="color:#a6e22e">suppressPackageStartupMessages</span>(<span style="color:#a6e22e">library</span>(tictoc)) <span style="color:#75715e"># To get timings</span>
 <span style="color:#a6e22e">suppressPackageStartupMessages</span>(<span style="color:#a6e22e">library</span>(sf)) <span style="color:#75715e"># To later work with the spatial results</span>
 <span style="color:#a6e22e">suppressPackageStartupMessages</span>(<span style="color:#a6e22e">library</span>(ggplot2)) <span style="color:#75715e"># For plotting</span>
 
-<span style="color:#75715e"># Put here the path to your downloaded full export</span>
+<span style="color:#75715e"># Put here the path to your downloaded occurrence dataset</span>
 <span style="color:#75715e"># In this case we need to add *.parquet</span>
 fe_path <span style="color:#f92672">&lt;-</span> <span style="color:#e6db74">&#34;/Volumes/OBIS2/obis_20250318_parquet/occurrence/*.parquet&#34;</span>
 
@@ -304,7 +304,7 @@ seabass_rec <span style="color:#f92672">&lt;-</span> full_export <span style="co
     <span style="color:#a6e22e">show_query</span>()
 </code></pre></div><pre><code>&lt;SQL&gt;
 SELECT aphiaid, occurrenceID
-FROM as_tbl_duckplyr_CvATbPmIAU
+FROM as_tbl_duckplyr_WK30bGTxN0
 WHERE (aphiaid = 126975.0)
 </code></pre>
 <p>By checking the queries you might notice that <em>sometimes</em> the queries are overly complex. But even with that, the package make it easier to do the queries, since it uses a grammar that is well know by R users.</p>
@@ -463,7 +463,7 @@ wrld <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">st_cro
         <span class='screen-reader-text'>Previous post: </span>Matching environmental information with OBIS occurrences</a>
     </div><div class='next-entry sep-before'>
       <a href='/tutorials/duckdb-part2/'>
-        <span class='screen-reader-text'>Next post: </span>Using DuckDB to query the OBIS full export - Part 2 (spatial extension)<span aria-hidden='true'>Next <svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+        <span class='screen-reader-text'>Next post: </span>Using DuckDB to query the OBIS occurrence dataset - Part 2 (spatial extension)<span aria-hidden='true'>Next <svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
   
   <line x1="4" y1="12" x2="20" y2="12"/>
   <polyline points="14 6 20 12 14 18"/>
