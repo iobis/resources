@@ -1,6 +1,46 @@
-library(duckplyr)
+library(duckdb)
+library(arrow)
 
-fe_path <- "/Volumes/OBIS2/data/obis_data/*.parquet"
+full_export <- "/Volumes/OBIS2/data/obis_data"
+con <- dbConnect(duckdb())
+dbSendQuery(con, "install httpfs; load httpfs;")
+
+# Package 1
+acanthuridae_by_year <- dbGetQuery(con, glue::glue(
+    "
+    -- Here we use COUNT which will count all entries
+    -- and this is how you write SQL comments...
+    SELECT *
+    FROM read_parquet('{full_export}/*.parquet', union_by_name = true)
+    WHERE interpreted.family = 'Acanthuridae'
+    LIMIT 10000
+    "
+))
+
+write_parquet(acanthuridae_by_year, "compact_1.parquet")
+zip::zip("content/tutorials/duckdb-part1/compact_1.parquet.zip", "compact_1.parquet")
+fs::file_delete("compact_1.parquet")
+
+# Package 2
+species_id <- c(124316, 145728)
+species_id <- paste(species_id, collapse = ", ")
+compact_2 <- dbGetQuery(con, glue::glue(
+    "
+    -- Here we use COUNT which will count all entries
+    -- and this is how you write SQL comments...
+    SELECT *
+    FROM read_parquet('{full_export}/*.parquet', union_by_name = true)
+    WHERE interpreted.aphiaid IN ({species_id})
+    "
+))
+
+write_parquet(compact_2, "compact_2.parquet")
+zip::zip("content/tutorials/duckdb-part2/compact_2.parquet.zip", "compact_2.parquet")
+fs::file_delete("compact_2.parquet")
+
+# Package 3
+
+
 
 sql_attach <- glue::glue("CREATE VIEW fe AS SELECT * EXCLUDE (tags) FROM '{fe_path}';")
 db_exec(sql_attach)
