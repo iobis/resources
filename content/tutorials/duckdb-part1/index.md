@@ -94,7 +94,6 @@ con <- dbConnect(duckdb())
 dbSendQuery(con, "install httpfs; load httpfs;")
 
 # Let's check first with Arrow
-tic("arrow query")
 ds <- open_dataset(speciesgrids)
 
 acanthuridae_counts_arrow <- ds |>
@@ -103,14 +102,8 @@ acanthuridae_counts_arrow <- ds |>
     summarise(total_records = sum(records)) |>
     collect() |>
     arrange(desc(total_records))
-toc()
-```
 
-    arrow query: 15.263 sec elapsed
-
-``` r
 # DuckDB query
-tic("DuckDB query")
 acanthuridae_counts <- dbGetQuery(con, glue(
     "
     SELECT AphiaID, SUM(records) AS total_records
@@ -120,10 +113,7 @@ acanthuridae_counts <- dbGetQuery(con, glue(
     ORDER BY total_records DESC;
     "
 ))
-toc()
 ```
-
-    DuckDB query: 16.885 sec elapsed
 
 Note that for DuckDB we had to add `/*` to the source (so it became `s3://obis-products/speciesgrids/h3_7/*`), telling that it should search all objects within that folder.
 
@@ -179,7 +169,7 @@ acanthuridae_by_year <- dbGetQuery(con, glue(
 toc()
 ```
 
-    DuckDB query on occurrence dataset: 50.106 sec elapsed
+    DuckDB query on occurrence dataset: 45.909 sec elapsed
 
 ``` r
 # When we don't need the DuckDB connection anymore it is very important
