@@ -1,9 +1,9 @@
 ---
-title: Using DuckDB to query the OBIS full export - Part 2 (spatial extension)
+title: Using DuckDB to query the OBIS occurrence dataset - Part 2 (spatial extension)
 description: >-
-  OBIS now has a full export in GeoParquet format, but to work with large
+  OBIS now has a occurrence dataset in GeoParquet format, but to work with large
   datasets you need the right tools. Here we explore how you can use DuckDB to
-  (very) fastly retrieve data from this resource.
+  (very) quickly retrieve data from this resource.
 authors:
   - silasprincipe
 date: 2025-09-26T00:00:00.000Z
@@ -25,9 +25,9 @@ output:
 
 # Spatial extension of DuckDB
 
-In a [previous tutorial]({{< ref "tutorials/duckdb-part1/index.md" >}}) we learned about **DuckDB** and how it can be used to query Parquet datasets from OBIS. As we shared, the new full export is a [GeoParquet](https://geoparquet.org/) dataset, meaning that it add spatial functionalities to the standard Parquet format. DuckDB has a powerful spatial extension, which we will present in this tutorial. Of course, we will just give you a glimpse of what you can do with this extension, and you should invest a few minutes to explore the [full documentation](https://duckdb.org/docs/stable/core_extensions/spatial/overview.html).
+In a [previous tutorial]({{< ref "tutorials/duckdb-part1/index.md" >}}) we learned about **DuckDB** and how it can be used to query Parquet datasets from OBIS. As we shared, the new occurrence dataset is a [GeoParquet](https://geoparquet.org/) dataset, meaning that it add spatial functionalities to the standard Parquet format. DuckDB has a powerful spatial extension, which we will present in this tutorial. Of course, we will just give you a glimpse of what you can do with this extension, and you should invest a few minutes to explore the [full documentation](https://duckdb.org/docs/stable/core_extensions/spatial/overview.html).
 
-Again, we will work with a local copy of the full export, which you can download from here: https://obis.org/data/access/. You can also explore together through the Jupyter Notebook ([download it locally](https://github.com/iobis/resources/blob/main/content/tutorials/duckdb-part2/duckdb-part2.ipynb) or open it through **Google Colab** by [clicking here](https://colab.research.google.com/github/iobis/resources/blob/main/content/tutorials/duckdb-part2/duckdb-part2.ipynb)).
+Again, we will work with a local copy of the occurrence dataset, which you can download from here: https://obis.org/data/access/. You can also explore together through the Jupyter Notebook ([download it locally](https://github.com/iobis/resources/blob/main/content/tutorials/duckdb-part2/duckdb-part2.ipynb) or open it through **Google Colab** by [clicking here](https://colab.research.google.com/github/iobis/resources/blob/main/content/tutorials/duckdb-part2/duckdb-part2.ipynb)).
 
 We will get all records for the sea-urchin [*Paracentrotus lividus*](https://obis.org/taxon/124316) and the macroalgae [*Laminaria ochroleuca*](https://obis.org/taxon/145728) on a region in the coast of Portugal and Spain. We will use a WKT (Well-Known Text) representation of a polygon:
 
@@ -38,7 +38,6 @@ You can check it on this nice website: https://wktmap.com/
 ``` r
 suppressPackageStartupMessages(library(dplyr)) # For some analysis
 suppressPackageStartupMessages(library(duckdb)) # Our main package
-suppressPackageStartupMessages(library(tictoc)) # To get timings
 suppressPackageStartupMessages(library(glue)) # To easily make the queries text
 suppressPackageStartupMessages(library(sf)) # To later work with the spatial results
 suppressPackageStartupMessages(library(ggplot2)) # For plotting
@@ -50,8 +49,8 @@ con <- dbConnect(duckdb())
 # Install the httpfs extension
 dbSendQuery(con, "install spatial; load spatial;")
 
-# Put here the path to your downloaded full export
-full_export <- "/Volumes/OBIS2/obis_20250318_parquet/occurrence"
+# Put here the path to your downloaded occurrence dataset
+full_export <- "/Volumes/OBIS2/data/obis_data"
 
 # Region:
 my_wkt <- "POLYGON ((-12.436523 35.817813, -3.999023 35.817813, -3.999023 44.465151, -12.436523 44.465151, -12.436523 35.817813))"
@@ -59,10 +58,9 @@ my_wkt <- "POLYGON ((-12.436523 35.817813, -3.999023 35.817813, -3.999023 44.465
 species_id <- c(124316, 145728)
 
 # DuckDB query
-tic("DuckDB query on full export with spatial extension")
 species_records <- dbGetQuery(con, glue(
     "
-    SELECT AphiaID, scientificName, date_year, occurrenceID, ST_AsText(geometry) AS geometry
+    SELECT interpreted.aphiaid AS AphiaID, interpreted.scientificName, interpreted.date_year, interpreted.occurrenceID, ST_AsText(geometry) AS geometry
     FROM read_parquet('{full_export}/*.parquet')
     WHERE
         AphiaID IN ({paste(species_id, collapse = ', ')}) AND
@@ -70,10 +68,7 @@ species_records <- dbGetQuery(con, glue(
         ST_Intersects (geometry, ST_GeomFromText('{my_wkt}'));
     "
 ))
-toc()
 ```
-
-    DuckDB query on full export with spatial extension: 15.106 sec elapsed
 
 And this is the resulting table:
 
@@ -81,18 +76,18 @@ And this is the resulting table:
 head(species_records, 3)
 ```
 
-      aphiaid       scientificName date_year
+      AphiaID       scientificName date_year
     1  145728 Laminaria ochroleuca      2018
     2  145728 Laminaria ochroleuca      1992
     3  145728 Laminaria ochroleuca      1992
                                                                                             occurrenceID
     1 ARMS_Vigo_TorallaA_20180607_20180924_SF40_ETOH_r1:ASV_758:0083628b0f91a654091f79a82b51df876aee08bc
-    2                                                                                IHCantabria_Preop_9
-    3                                                                              IHCantabria_Preop_112
-                              geometry
-    1          POINT (-8.7787 42.2284)
-    2 POINT (-5.988330714 43.58276275)
-    3      POINT (-5.681897 43.545396)
+    2                                                                              IHCantabria_Preop_112
+    3                                                                              IHCantabria_Preop_133
+                         geometry
+    1     POINT (-8.7787 42.2284)
+    2 POINT (-5.681897 43.545396)
+    3 POINT (-5.662574 43.549548)
 
 As you see, it contains a column `geometry` which is now converted to a WKT representation of the geometry. We can read it on R by using the `sf` package. Then we will plot it using `ggplot2`
 
@@ -125,10 +120,9 @@ Now, let's consider a buffer around the selected area:
 
 ``` r
 # DuckDB query
-tic("Buffer query")
 species_records_buff <- dbGetQuery(con, glue(
     "
-    SELECT AphiaID, scientificName, date_year, occurrenceID, ST_AsText(geometry) AS geometry
+    SELECT interpreted.aphiaid AS AphiaID, interpreted.scientificName, interpreted.date_year, interpreted.occurrenceID, ST_AsText(geometry) AS geometry
     FROM read_parquet('{full_export}/*.parquet')
     WHERE
         AphiaID IN ({paste(species_id, collapse = ', ')}) AND
@@ -137,10 +131,7 @@ species_records_buff <- dbGetQuery(con, glue(
         -- The distance of the buffer is expressed in degrees, that is, on the same unit of the CRS of the polygon
     "
 ))
-toc()
 ```
-
-    Buffer query: 15.209 sec elapsed
 
 And this is the resulting table:
 
@@ -148,18 +139,18 @@ And this is the resulting table:
 head(species_records_buff, 3)
 ```
 
-      aphiaid       scientificName date_year
+      AphiaID       scientificName date_year
     1  145728 Laminaria ochroleuca      2018
     2  145728 Laminaria ochroleuca      1951
-    3  145728 Laminaria ochroleuca      1998
+    3  145728 Laminaria ochroleuca      1948
                                                                                             occurrenceID
     1 ARMS_Vigo_TorallaA_20180607_20180924_SF40_ETOH_r1:ASV_758:0083628b0f91a654091f79a82b51df876aee08bc
-    2                                                                     DASSH_NATENG000001_SE04_145728
-    3                                                         DASSH_NATENG000087_DK16_2_15_021098_145728
+    2                                                                     DASSH_NATENG000001_SE01_145728
+    3                                                                     DASSH_NATENG000001_SE02_145728
                           geometry
     1      POINT (-8.7787 42.2284)
-    2  POINT (-3.776326 50.228351)
-    3 POINT (-4.1360712 50.338249)
+    2 POINT (-4.1358912 50.362985)
+    3 POINT (-4.4464779 50.337661)
 
 ``` r
 sp_records_buff_sf <- st_as_sf(species_records_buff, wkt = "geometry", crs = "EPSG:4326")
@@ -185,12 +176,11 @@ Finally, let's get the convex hull over all records of each species. I will also
 
 ``` r
 # DuckDB query
-tic("Convex hull query")
 species_records_hull <- dbGetQuery(con, glue(
     "
     SELECT 
-        AphiaID,
-        scientificName,
+        interpreted.aphiaid AS AphiaID,
+        interpreted.scientificName AS scientificName,
         ST_AsText(ST_ConvexHull(ST_Union_Agg(geometry))) AS convex_hull
     FROM read_parquet('{full_export}/*.parquet')
     WHERE
@@ -198,30 +188,19 @@ species_records_hull <- dbGetQuery(con, glue(
     GROUP BY AphiaID, scientificName
     "
 ))
-toc()
-```
 
-    Convex hull query: 2.101 sec elapsed
-
-``` r
-tic("All records query")
 species_records_all <- dbGetQuery(con, glue(
     "
     SELECT 
-        AphiaID,
-        scientificName,
+        interpreted.aphiaid AS AphiaID,
+        interpreted.scientificName AS scientificName,
         ST_AsText(geometry) AS geometry
     FROM read_parquet('{full_export}/*.parquet')
     WHERE
         AphiaID IN ({paste(species_id, collapse = ', ')})
     "
 ))
-toc()
-```
 
-    All records query: 1.995 sec elapsed
-
-``` r
 dbDisconnect(con)
 ```
 

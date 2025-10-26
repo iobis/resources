@@ -1,0 +1,5 @@
+project:
+  type: hugo
+  render:
+    - "*.qmd"      # render all qmd
+    - "!**/*.ipynb" # but exclude all ipynb files

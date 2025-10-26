@@ -1,9 +1,11 @@
 ---
-title: Using DuckDB to query the OBIS full export - Part 3 (`duckplyr` package)
+title: >-
+  Using DuckDB to query the OBIS occurrence dataset - Part 3 (`duckplyr`
+  package)
 description: >-
-  OBIS now has a full export in GeoParquet format, but to work with large
+  OBIS now has a occurrence dataset in GeoParquet format, but to work with large
   datasets you need the right tools. Here we explore how you can use DuckDB to
-  (very) fastly retrieve data from this resource.
+  (very) quickly retrieve data from this resource.
 authors:
   - silasprincipe
 date: 2025-09-26T00:00:00.000Z
@@ -27,9 +29,9 @@ output:
 
 In the two previous tutorials we learned about how to use [DuckDB for querying the Parquet exports]({{< ref "tutorials/duckdb-part1/index.md" >}}) and about [the DuckDB spatial extension]({{< ref "tutorials/duckdb-part2/index.md" >}}). Here we will explore the R package [`duckplyr`](https://duckplyr.tidyverse.org/index.html), a drop-in replacement for DuckDB on R which uses the `tidyverse` grammar.
 
-Again, we will work with a local copy of the full export, which you can download from here: https://obis.org/data/access/. You can also explore together through the Jupyter Notebook ([download it locally](https://github.com/iobis/resources/blob/main/content/tutorials/duckdb-part3/duckdb-part3.ipynb) or open it through **Google Colab** by [clicking here](https://colab.research.google.com/github/iobis/resources/blob/main/content/tutorials/duckdb-part3/duckdb-part3.ipynb)).
+Again, we will work with a local copy of the occurrence dataset, which you can download here: https://obis.org/data/access/. You can also explore together through the Jupyter Notebook ([download it locally](https://github.com/iobis/resources/blob/main/content/tutorials/duckdb-part3/duckdb-part3.ipynb) or open it through **Google Colab** by [clicking here](https://colab.research.google.com/github/iobis/resources/blob/main/content/tutorials/duckdb-part3/duckdb-part3.ipynb)).
 
-We will work with the European sea-bass [*Dicentrarchus labrax*](https://obis.org/taxon/126975). Let's start by simpling get all records for it.
+We will work with the European sea-bass [*Dicentrarchus labrax*](https://obis.org/taxon/126975). Let's start by simply getting all records for it.
 
 ``` r
 suppressPackageStartupMessages(library(duckplyr)) # For queries
@@ -37,7 +39,7 @@ suppressPackageStartupMessages(library(tictoc)) # To get timings
 suppressPackageStartupMessages(library(sf)) # To later work with the spatial results
 suppressPackageStartupMessages(library(ggplot2)) # For plotting
 
-# Put here the path to your downloaded full export
+# Put here the path to your downloaded occurrence dataset
 # In this case we need to add *.parquet
 fe_path <- "/Volumes/OBIS2/obis_20250318_parquet/occurrence/*.parquet"
 
@@ -130,7 +132,7 @@ full_export |>
 
     <SQL>
     SELECT aphiaid, occurrenceID
-    FROM as_tbl_duckplyr_CvATbPmIAU
+    FROM as_tbl_duckplyr_WK30bGTxN0
     WHERE (aphiaid = 126975.0)
 
 By checking the queries you might notice that *sometimes* the queries are overly complex. But even with that, the package make it easier to do the queries, since it uses a grammar that is well know by R users.

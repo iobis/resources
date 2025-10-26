@@ -1,9 +1,9 @@
 ---
-title: Using DuckDB to query the OBIS full export - Part 1
+title: Using DuckDB to query the OBIS occurrence dataset - Part 1
 description: >-
-  OBIS now has a full export in GeoParquet format, but to work with large
+  OBIS now has a occurrence dataset in GeoParquet format, but to work with large
   datasets you need the right tools. Here we explore how you can use DuckDB to
-  (very) fastly retrieve data from this resource.
+  (very) quickly retrieve data from this resource.
 authors:
   - silasprincipe
 date: 2025-09-26T00:00:00.000Z
@@ -22,9 +22,9 @@ output:
 ---
 
 
-# The OBIS full export
+# The OBIS occurrence dataset
 
-OBIS has more than 160 million occurrence records available (and growing!). Previously you could download the [full export](https://obis.org/data/access/) as a single Parquet file and do a range of analysis with it, but since recently the full export [became available in AWS](https://github.com/iobis/obis-open-data) through the [Open Data Program](https://aws.amazon.com/opendata/). This came with a total update of the way the data is offered. Now the full export is offered as a dataset of [GeoParquet](https://geoparquet.org/) files, what opens up a world of possibilities in doing spatial analysis with the data, and also make analysis much more efficient and cloud performant. This new version also contains all measurements of the [eMoF extension](https://manual.obis.org/data_format.html#extendedmeasurementorfact-extension-emof).
+OBIS has more than 160 million occurrence records available (and growing!). Previously you could download the [occurrence dataset](https://obis.org/data/access/) as a single Parquet file and do a range of analysis with it, but since recently the occurrence dataset [became available in AWS](https://github.com/iobis/obis-open-data) through the [Open Data Program](https://aws.amazon.com/opendata/). This came with a total update of the way the data is offered. Now the occurrence dataset is offered as [GeoParquet](https://geoparquet.org/) files, what opens up a world of possibilities in doing spatial analysis with the data, and also make analysis much more efficient and cloud performant. This new version also contains all measurements of the [eMoF extension](https://manual.obis.org/data_format.html#extendedmeasurementorfact-extension-emof).
 
 There are two ways you can access this dataset: download it locally or access directly from the AWS bucket. In both cases, we need the right tools to work with it. So, let's dive in this three parts tutorial. On the first part we will talk about [**DuckDB**](https://duckdb.org/), and how to do basic SQL queries. On the second part we will check the spatial capabilities of DuckDB. Finally, on the third part we will explore duckplyr, an R package that brings the tidyverse grammar to work with DuckDB on R.
 
@@ -71,7 +71,7 @@ ORDER BY records DESC;
 
 # Let's do some analysis
 
-Ok, now that we have the basic knowledge of SQL, we can start exploring the OBIS full export. As we said, **you can access it directly from AWS**, but our experience shows that for normal internet connections, it is better to have a local copy instead. But to help you understand how you can access it directly from AWS, we will first show queries in another dataset, [the `speciesgrids`](https://github.com/iobis/speciesgrids), which provides a gridded version of all marine data in OBIS and GBIF.
+Ok, now that we have the basic knowledge of SQL, we can start exploring the OBIS occurrence dataset. As we said, **you can access it directly from AWS**, but our experience shows that for normal internet connections, it is better to have a local copy instead. But to help you understand how you can access it directly from AWS, we will first show queries in another dataset, [the `speciesgrids`](https://github.com/iobis/speciesgrids), which provides a gridded version of all marine data in OBIS and GBIF.
 
 We will start by doing a very simple query - we will get the number of records for each species in the family [Acanthuridae](https://obis.org/taxon/125515). Just to prove that DuckDB is very fast, we will compare the same query done with the package [`arrow`](https://arrow.apache.org/docs/r/index.html).
 
@@ -106,7 +106,7 @@ acanthuridae_counts_arrow <- ds |>
 toc()
 ```
 
-    arrow query: 17.2 sec elapsed
+    arrow query: 15.263 sec elapsed
 
 ``` r
 # DuckDB query
@@ -123,7 +123,7 @@ acanthuridae_counts <- dbGetQuery(con, glue(
 toc()
 ```
 
-    DuckDB query: 18.781 sec elapsed
+    DuckDB query: 16.885 sec elapsed
 
 Note that for DuckDB we had to add `/*` to the source (so it became `s3://obis-products/speciesgrids/h3_7/*`), telling that it should search all objects within that folder.
 
@@ -151,23 +151,27 @@ head(acanthuridae_counts, 3)
     2  159578        176533
     3  159580        125576
 
-Now, for the **full export**. You can download it locally from the link available here: https://obis.org/data/access/
+Now, for the **occurrence dataset**. You can download it locally following the instructions from: https://github.com/iobis/obis-open-data
 
 We will again get the number of records by species on the Acanthuridae family. But this time, we will get it by year.
 
 ``` r
-# Put here the path to your downloaded full export
-full_export <- "/Volumes/OBIS2/obis_20250318_parquet/occurrence"
+# Put here the path to your downloaded occurrence dataset
+full_export <- "occurrence"
+```
 
+``` r
 # DuckDB query
-tic("DuckDB query on full export")
+tic("DuckDB query on occurrence dataset")
 acanthuridae_by_year <- dbGetQuery(con, glue(
     "
     -- Here we use COUNT which will count all entries
     -- and this is how you write SQL comments...
-    SELECT aphiaid AS AphiaID, date_year, COUNT(*) AS total_records
-    FROM read_parquet('{full_export}/*.parquet')
-    WHERE family = 'Acanthuridae'
+    SELECT interpreted.aphiaid AS AphiaID, interpreted.date_year as date_year, COUNT(*) AS total_records
+    -- Here we use the argument 'union_by_name = true' because some files
+    -- of the dataset have some missing columns, and all should be equal
+    FROM read_parquet('{full_export}/*.parquet', union_by_name = true)
+    WHERE interpreted.family = 'Acanthuridae'
     GROUP BY aphiaid, date_year
     ORDER BY total_records DESC;
     "
@@ -175,7 +179,7 @@ acanthuridae_by_year <- dbGetQuery(con, glue(
 toc()
 ```
 
-    DuckDB query on full export: 1.263 sec elapsed
+    DuckDB query on occurrence dataset: 50.106 sec elapsed
 
 ``` r
 # When we don't need the DuckDB connection anymore it is very important
@@ -184,18 +188,20 @@ toc()
 dbDisconnect(con)
 ```
 
-Less than 2 seconds! That is really fast. Here is how the table looks like:
+Notice that we added the prefix `interpreted` to some of the columns (e.g. `interpreted.aphiaid`). This is to access columns within a specific field of dataset (you can learn more about it on the [dataset documentation](https://github.com/iobis/obis-open-data)). At the top level of the dataset, you have some columns like `_id` (the OBIS records UUID), `dataset_id` (the OBIS dataset UUID), and a column named `interpreted`. This is the field which gives you access to the Darwin Core terms, such as `decimalLongitude`, `decimalLatitude` and `scientificName`. One other point to highlight is the SQL command `AS` which you can use to rename a column or to assign a result to another column.
+
+Here is how the resulting table looks like:
 
 ``` r
 head(acanthuridae_by_year, 5)
 ```
 
       AphiaID date_year total_records
-    1  219659      2015          7872
-    2  159581      2014          6816
-    3  159581      2012          6239
-    4  159581      2016          6120
-    5  159578      2014          5875
+    1  219659      2015          7874
+    2  159581      2016          7590
+    3  159581      2014          7555
+    4  159581      2012          6983
+    5  159578      2014          6843
 
 Once you have it as an R object, you can then keep working with it. For example, we will get the three species with more records, do the cummulative sum of records and plot it.
 
