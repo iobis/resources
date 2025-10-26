@@ -273,7 +273,6 @@ con <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">dbConne
 <span style="color:#a6e22e">dbSendQuery</span>(con, <span style="color:#e6db74">&#34;install httpfs; load httpfs;&#34;</span>)
 
 <span style="color:#75715e"># Let&#39;s check first with Arrow</span>
-<span style="color:#a6e22e">tic</span>(<span style="color:#e6db74">&#34;arrow query&#34;</span>)
 ds <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">open_dataset</span>(speciesgrids)
 
 acanthuridae_counts_arrow <span style="color:#f92672">&lt;-</span> ds <span style="color:#f92672">|&gt;</span>
@@ -282,11 +281,8 @@ acanthuridae_counts_arrow <span style="color:#f92672">&lt;-</span> ds <span styl
     <span style="color:#a6e22e">summarise</span>(total_records <span style="color:#f92672">=</span> <span style="color:#a6e22e">sum</span>(records)) <span style="color:#f92672">|&gt;</span>
     <span style="color:#a6e22e">collect</span>() <span style="color:#f92672">|&gt;</span>
     <span style="color:#a6e22e">arrange</span>(<span style="color:#a6e22e">desc</span>(total_records))
-<span style="color:#a6e22e">toc</span>()
-</code></pre></div><pre><code>arrow query: 15.263 sec elapsed
-</code></pre>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#75715e"># DuckDB query</span>
-<span style="color:#a6e22e">tic</span>(<span style="color:#e6db74">&#34;DuckDB query&#34;</span>)
+
+<span style="color:#75715e"># DuckDB query</span>
 acanthuridae_counts <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">dbGetQuery</span>(con, <span style="color:#a6e22e">glue</span>(
     <span style="color:#e6db74">&#34;
 </span><span style="color:#e6db74">    SELECT AphiaID, SUM(records) AS total_records
@@ -296,10 +292,7 @@ acanthuridae_counts <span style="color:#f92672">&lt;-</span> <span style="color:
 </span><span style="color:#e6db74">    ORDER BY total_records DESC;
 </span><span style="color:#e6db74">    &#34;</span>
 ))
-<span style="color:#a6e22e">toc</span>()
-</code></pre></div><pre><code>DuckDB query: 16.885 sec elapsed
-</code></pre>
-<p>Note that for DuckDB we had to add <code>/*</code> to the source (so it became <code>s3://obis-products/speciesgrids/h3_7/*</code>), telling that it should search all objects within that folder.</p>
+</code></pre></div><p>Note that for DuckDB we had to add <code>/*</code> to the source (so it became <code>s3://obis-products/speciesgrids/h3_7/*</code>), telling that it should search all objects within that folder.</p>
 <p>The resulting object looks like this:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#75715e"># Arrow version</span>
 <span style="color:#a6e22e">head</span>(acanthuridae_counts_arrow, <span style="color:#ae81ff">3</span>)
@@ -337,7 +330,7 @@ acanthuridae_by_year <span style="color:#f92672">&lt;-</span> <span style="color
 </span><span style="color:#e6db74">    &#34;</span>
 ))
 <span style="color:#a6e22e">toc</span>()
-</code></pre></div><pre><code>DuckDB query on occurrence dataset: 50.106 sec elapsed
+</code></pre></div><pre><code>DuckDB query on occurrence dataset: 45.909 sec elapsed
 </code></pre>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#75715e"># When we don&#39;t need the DuckDB connection anymore it is very important</span>
 <span style="color:#75715e"># to close it. After closing, if you need it again you should start from the</span>
